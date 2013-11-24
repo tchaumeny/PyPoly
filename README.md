@@ -1,7 +1,11 @@
 pypoly: Python Polynomials
-==============================
+==========================
 
 A Python extension written in C, implementing the `Polynomial` type.
+
+*Requires Python 3*
+
+*Work in progress*
 
 Usage
 -----

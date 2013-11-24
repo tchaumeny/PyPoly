@@ -3,6 +3,12 @@
 
 #include "polynomials.h"
 
+/* Compatibility - taken from cPython 3.3 */
+#ifndef Py_RETURN_NOTIMPLEMENTED
+#define Py_RETURN_NOTIMPLEMENTED \
+    return Py_INCREF(Py_NotImplemented), Py_NotImplemented
+#endif
+
 /* A Python Polynomial Object */
 typedef struct {
     PyObject_HEAD
@@ -148,7 +154,11 @@ static PyObject*
 PyPoly_repr(PyPoly_PolynomialObject *self)
 {
     char* str = poly_to_string(&(self->poly));
+#if PY_VERSION_HEX >= 0x03030000
     return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, str, strlen(str));
+#else
+    return PyUnicode_FromStringAndSize(str, strlen(str));
+#endif
 }
 
 /* Macro used to generate binary functions on Python objects
