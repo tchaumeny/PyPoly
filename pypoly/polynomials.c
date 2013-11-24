@@ -12,7 +12,7 @@
 #define MAX(a,b)    (((a)>(b))?(a):(b))
 
 /* strdup is not part of the C standard and might not be available */
-static inline char *__strdup(const char *s) {
+static inline char *strduplicate(const char *s) {
     int len = strlen(s) + 1;
     char *p;
     if ((p = malloc(len * sizeof(char))) == NULL) {
@@ -20,7 +20,7 @@ static inline char *__strdup(const char *s) {
     }
     return memcpy(p, s, len);
 }
-#define strdup __strdup
+#define strdup strduplicate
 
 /**
  * Complex numbers
