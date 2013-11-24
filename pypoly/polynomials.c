@@ -390,21 +390,3 @@ error:
     if (T2.coef != NULL) poly_free(&T2);
     return 0;
 }
-
-int main() {
-    Polynomial A, B, Q, R;
-    int er;
-    Poly_InitConst(&B, ((Complex){1, 0}), er)
-    poly_init(&A, 1);
-    //poly_init(&B, 5);
-    int i;
-    poly_set_coef(&A, 1, (Complex){1, 0});
-    //for (i = 0; i <= 5; ++i)
-    //    poly_set_coef(&B, i, (Complex){1, 0});
-    printf("Num: %d, %s\n", A.deg, poly_to_string(&A));
-    printf("Den: %d, %s\n", B.deg, poly_to_string(&B));
-    poly_div(&A, &B, &Q, &R);
-    printf("Quotient: %d, %s\n", Q.deg, poly_to_string(&Q));
-    printf("Remainder: %d, %s\n", R.deg, poly_to_string(&R));
-    return 0;
-}
