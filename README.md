@@ -1,4 +1,4 @@
-``pypoly``: Python Polynomials
+pypoly: Python Polynomials
 ==============================
 
 A Python extension written in C, implementing the `Polynomial` type.
