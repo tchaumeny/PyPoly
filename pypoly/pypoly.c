@@ -63,41 +63,50 @@ typedef enum {
    EXTRACT_ERR,          // Generic error handled by cPython (overflow, etc.)
    EXTRACT_ERRTYPE,      // Unsupported type
    EXTRACT_ERRMEM        // Malloc failure
-} PolyExtractionStatus;
+} ExtractionStatus;
 
-#define PolyExtractionFailure(status) ((PolyExtractionStatus)(status) >= EXTRACT_ERR)
+#define PolyExtractionFailure(status) ((ExtractionStatus)(status) >= EXTRACT_ERR)
 
-PolyExtractionStatus
-extract_poly(PyObject *obj, Polynomial *P)
+static ExtractionStatus
+extract_complex(PyObject *obj, Py_complex *dest)
 {
-    int failure = 0;
-    if (PyLong_Check(obj)) {
-        Py_complex c = CZero;
-        c.real = PyLong_AsDouble(obj);
+    Py_complex c;
+    if (PyComplex_Check(obj)) {
+        c = PyComplex_AsCComplex(obj);
         if (c.real == -1.0 && PyErr_Occurred()) {
             return EXTRACT_ERR;
         }
-        Poly_InitConst(P, c, failure)
-        return failure ? EXTRACT_ERRMEM : EXTRACT_CREATED;
-    }
-    if (PyFloat_Check(obj)) {
-        Py_complex c = CZero;
+    } else if (PyFloat_Check(obj)) {
+        c = CZero;
         c.real = PyFloat_AsDouble(obj);
         if (c.real == -1.0 && PyErr_Occurred()) {
             return EXTRACT_ERR;
         }
-        Poly_InitConst(P, c, failure)
-        return failure ? EXTRACT_ERRMEM : EXTRACT_CREATED;
-    }
-    if (PyComplex_Check(obj)) {
-        Py_complex c = PyComplex_AsCComplex(obj);
+    } else if (PyLong_Check(obj)) {
+        c = CZero;
+        c.real = PyLong_AsDouble(obj);
         if (c.real == -1.0 && PyErr_Occurred()) {
             return EXTRACT_ERR;
         }
-        Poly_InitConst(P, c, failure)
-        return failure ? EXTRACT_ERRMEM : EXTRACT_CREATED;
+    } else {
+        return EXTRACT_ERRTYPE;
     }
-    return EXTRACT_ERRTYPE;
+    *dest = c;
+    return EXTRACT_CREATED;
+}
+
+static inline ExtractionStatus
+extract_poly(PyObject *obj, Polynomial *P)
+{
+    Py_complex c;
+    int errmem = 0;
+    ExtractionStatus status;
+    status = extract_complex(obj, &c);
+    if (status == EXTRACT_CREATED) {
+        Poly_InitConst(P, c, errmem)
+        if (errmem) status = EXTRACT_ERRMEM;
+    }
+    return status;
 }
 
 #define ExtractOrBorrowPoly(obj, P, status)             \
@@ -161,11 +170,12 @@ PyPoly_repr(PyPoly_PolynomialObject *self)
 #endif
 }
 
-/* Macro used to generate binary functions on Python objects
- * using functions defined on Polynomial objects.
- * Takes care of Polynomial extraction from parameters and possible errors.
- * REFACTORING NEEDED /!\ */
-#define PYPOLY_BINARYFUNC(poly_func)                        \
+/* Macro for converting the arguments of a function into
+ * into two Polynomial objects, in order to perform some operation
+ * Assumes: PyObject *self, *other are the arguments
+ * Constructs: Polynomial A, B; ExtractionStatus A_status, B_status
+ */
+#define PYPOLY_BINARYFUNC_HEADER                            \
     int A_status, B_status;                                 \
     Polynomial A, B;                                        \
     ExtractOrBorrowPoly(self, A, A_status)                  \
@@ -182,31 +192,45 @@ PyPoly_repr(PyPoly_PolynomialObject *self)
         } else {                                            \
             return PyErr_NoMemory();                        \
         }                                                   \
-    }                                                       \
+    }
+
+static PyObject*
+PyPoly_add(PyObject *self, PyObject *other)
+{
+    PYPOLY_BINARYFUNC_HEADER
     Polynomial R;                                           \
-    if (!poly_func(&A, &B, &R)) {                           \
+    if (!poly_add(&A, &B, &R)) {                           \
         if (A_status == EXTRACT_CREATED) poly_free(&A);     \
         if (B_status == EXTRACT_CREATED) poly_free(&B);     \
         return PyErr_NoMemory();                            \
     }                                                       \
     return (PyObject*)NewPoly(0, &R);
-
-static PyObject*
-PyPoly_add(PyObject *self, PyObject *other)
-{
-    PYPOLY_BINARYFUNC(poly_add)
 }
 
 static PyObject*
 PyPoly_sub(PyObject *self, PyObject *other)
 {
-    PYPOLY_BINARYFUNC(poly_sub)
+    PYPOLY_BINARYFUNC_HEADER
+    Polynomial R;                                           \
+    if (!poly_sub(&A, &B, &R)) {                           \
+        if (A_status == EXTRACT_CREATED) poly_free(&A);     \
+        if (B_status == EXTRACT_CREATED) poly_free(&B);     \
+        return PyErr_NoMemory();                            \
+    }                                                       \
+    return (PyObject*)NewPoly(0, &R);
 }
 
 static PyObject*
 PyPoly_mult(PyObject *self, PyObject *other)
 {
-    PYPOLY_BINARYFUNC(poly_multiply)
+    PYPOLY_BINARYFUNC_HEADER
+    Polynomial R;                                           \
+    if (!poly_multiply(&A, &B, &R)) {                           \
+        if (A_status == EXTRACT_CREATED) poly_free(&A);     \
+        if (B_status == EXTRACT_CREATED) poly_free(&B);     \
+        return PyErr_NoMemory();                            \
+    }                                                       \
+    return (PyObject*)NewPoly(0, &R);
 }
 
 static PyObject*
@@ -251,23 +275,7 @@ PyPoly_pow(PyPoly_PolynomialObject *self, PyObject *pyexp, PyObject *pymod)
 static PyObject*
 PyPoly_remain(PyObject *self, PyObject *other)
 {
-    int A_status, B_status;
-    Polynomial A, B;
-    ExtractOrBorrowPoly(self, A, A_status)
-    ExtractOrBorrowPoly(other, B, B_status)
-    if (PolyExtractionFailure(A_status)
-        ||
-        PolyExtractionFailure(B_status)) {
-        if (A_status == EXTRACT_CREATED) poly_free(&A);
-        if (B_status == EXTRACT_CREATED) poly_free(&B);
-        if (A_status == EXTRACT_ERRTYPE
-            ||
-            B_status == EXTRACT_ERRTYPE) {
-            Py_RETURN_NOTIMPLEMENTED;
-        } else {
-            return PyErr_NoMemory();
-        }
-    }
+    PYPOLY_BINARYFUNC_HEADER
     Polynomial R;
     int res = poly_div(&A, &B, NULL, &R);
     if (res != 1) {
@@ -291,23 +299,7 @@ PyPoly_remain(PyObject *self, PyObject *other)
 static PyObject*
 PyPoly_divmod(PyObject *self, PyObject *other)
 {
-    int A_status, B_status;
-    Polynomial A, B;
-    ExtractOrBorrowPoly(self, A, A_status)
-    ExtractOrBorrowPoly(other, B, B_status)
-    if (PolyExtractionFailure(A_status)
-        ||
-        PolyExtractionFailure(B_status)) {
-        if (A_status == EXTRACT_CREATED) poly_free(&A);
-        if (B_status == EXTRACT_CREATED) poly_free(&B);
-        if (A_status == EXTRACT_ERRTYPE
-            ||
-            B_status == EXTRACT_ERRTYPE) {
-            Py_RETURN_NOTIMPLEMENTED;
-        } else {
-            return PyErr_NoMemory();
-        }
-    }
+    PYPOLY_BINARYFUNC_HEADER
     Polynomial Q, R;
     int res = poly_div(&A, &B, &Q, &R);
     if (res != 1) {
@@ -343,23 +335,7 @@ PyPoly_compare(PyObject *self, PyObject *other, int opid)
     if (opid != Py_EQ && opid != Py_NE) {
         Py_RETURN_NOTIMPLEMENTED;
     }
-    int A_status, B_status;
-    Polynomial A, B;
-    ExtractOrBorrowPoly(self, A, A_status)
-    ExtractOrBorrowPoly(other, B, B_status)
-    if (PolyExtractionFailure(A_status)
-        ||
-        PolyExtractionFailure(B_status)) {
-        if (A_status == EXTRACT_CREATED) poly_free(&A);
-        if (B_status == EXTRACT_CREATED) poly_free(&B);
-        if (A_status == EXTRACT_ERRTYPE
-            ||
-            B_status == EXTRACT_ERRTYPE) {
-            Py_RETURN_NOTIMPLEMENTED;
-        } else {
-            return PyErr_NoMemory();
-        }
-    }
+    PYPOLY_BINARYFUNC_HEADER
     if ((poly_equal(&A, &B) && opid == Py_EQ)
             ||
         (!poly_equal(&A, &B) && opid == Py_NE)) {
