@@ -1,4 +1,4 @@
-pypoly: Python Polynomials
+pypoly: Python Polynomials 
 ==========================
 
 A Python extension written in C, implementing the `Polynomial` type.
@@ -36,9 +36,11 @@ Or:
     >>> Polynomial(-1, -1) * Polynomial(2, -3)
     -2 + X + 3 * X**2
     >>> P = Polynomial(1, 2, 3)
-    >>> P(13)   # Evaluates P(x) for x = 13
+    >>> P(13)
     534.0
-    >>> divmod(1 + X + X**2, 1 + X)
-    (X, 1)
+    >>> (1 + X + X**2) // (1 + X)
+    X
     >>> (2 * X + 3 * X**2 + X**5 + X**7) % (X**2 + 1)
     -3 + 2 * X
+
+[![Build Status](https://travis-ci.org/tchaumeny/PyPoly.png)](https://travis-ci.org/tchaumeny/PyPoly)
