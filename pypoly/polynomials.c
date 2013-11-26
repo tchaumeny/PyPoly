@@ -288,6 +288,18 @@ int poly_neg(Polynomial *A, Polynomial *Q) {
     return 1;
 }
 
+int poly_scal_multiply(Polynomial *A, Complex c, Polynomial *R) {
+    if (!poly_init(R, A->deg)) {
+        return 0;
+    }
+    int i;
+    for (i = 0; i <= A->deg; ++i) {
+        R->coef[i] = complex_mult(Poly_GetCoef(A, i), c);
+    }
+    Poly_Resize(R);
+    return 1;
+}
+
 int poly_multiply(Polynomial *A, Polynomial *B, Polynomial *R) {
     // TODO: implement faster algo
     if (!poly_init(R, A->deg + B->deg)) {

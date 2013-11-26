@@ -120,6 +120,13 @@ extract_poly(PyObject *obj, Polynomial *P)
 /**
  * PyObject API implementation
  */
+#define ReturnPyPolyOrFree(P)                       \
+PyObject *p;                                        \
+if ((p = (PyObject*)NewPoly(0, &P)) == NULL) {      \
+    poly_free(&P);                                  \
+    return NULL;                                    \
+}                                                   \
+return p;
 
 static PyObject*
 PyPoly_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds)
@@ -156,7 +163,7 @@ PyPoly_copy(PyPoly_PolynomialObject *self)
     if (!poly_copy(&(self->poly), &P)) {
         return PyErr_NoMemory();
     }
-    return (PyObject*)NewPoly(0, &P);
+    ReturnPyPolyOrFree(P)
 }
 
 static PyObject*
@@ -198,39 +205,67 @@ static PyObject*
 PyPoly_add(PyObject *self, PyObject *other)
 {
     PYPOLY_BINARYFUNC_HEADER
-    Polynomial R;                                           \
-    if (!poly_add(&A, &B, &R)) {                           \
-        if (A_status == EXTRACT_CREATED) poly_free(&A);     \
-        if (B_status == EXTRACT_CREATED) poly_free(&B);     \
-        return PyErr_NoMemory();                            \
-    }                                                       \
-    return (PyObject*)NewPoly(0, &R);
+    Polynomial R;
+    if (!poly_add(&A, &B, &R)) {
+        if (A_status == EXTRACT_CREATED) poly_free(&A);
+        if (B_status == EXTRACT_CREATED) poly_free(&B);
+        return PyErr_NoMemory();
+    }
+    ReturnPyPolyOrFree(R)
 }
 
 static PyObject*
 PyPoly_sub(PyObject *self, PyObject *other)
 {
     PYPOLY_BINARYFUNC_HEADER
-    Polynomial R;                                           \
-    if (!poly_sub(&A, &B, &R)) {                           \
-        if (A_status == EXTRACT_CREATED) poly_free(&A);     \
-        if (B_status == EXTRACT_CREATED) poly_free(&B);     \
-        return PyErr_NoMemory();                            \
-    }                                                       \
-    return (PyObject*)NewPoly(0, &R);
+    Polynomial R;
+    if (!poly_sub(&A, &B, &R)) {
+        if (A_status == EXTRACT_CREATED) poly_free(&A);
+        if (B_status == EXTRACT_CREATED) poly_free(&B);
+        return PyErr_NoMemory();
+    }
+    ReturnPyPolyOrFree(R)
 }
 
 static PyObject*
 PyPoly_mult(PyObject *self, PyObject *other)
 {
     PYPOLY_BINARYFUNC_HEADER
-    Polynomial R;                                           \
-    if (!poly_multiply(&A, &B, &R)) {                           \
-        if (A_status == EXTRACT_CREATED) poly_free(&A);     \
-        if (B_status == EXTRACT_CREATED) poly_free(&B);     \
-        return PyErr_NoMemory();                            \
-    }                                                       \
-    return (PyObject*)NewPoly(0, &R);
+    Polynomial R;
+    if (!poly_multiply(&A, &B, &R)) {
+        if (A_status == EXTRACT_CREATED) poly_free(&A);
+        if (B_status == EXTRACT_CREATED) poly_free(&B);
+        return PyErr_NoMemory();
+    }
+    ReturnPyPolyOrFree(R)
+}
+
+static PyObject*
+PyPoly_div(PyObject *self, PyObject *other)
+{
+    if(!PyPolynomial_Check(self)) {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+    Py_complex c;
+    ExtractionStatus c_status = extract_complex(other, &c);
+    switch (c_status) {
+        case EXTRACT_CREATED:
+            break;
+        case EXTRACT_ERR:
+            return PyErr_NoMemory();
+        case EXTRACT_ERRTYPE:
+            Py_RETURN_NOTIMPLEMENTED;
+        case EXTRACT_ERRMEM:
+            return PyErr_NoMemory();
+        default:
+            Py_RETURN_NOTIMPLEMENTED;
+    }
+    c = _Py_c_quot(COne, c);
+    Polynomial P;
+    if(!poly_scal_multiply(&(((PyPoly_PolynomialObject*)self)->poly), c, &P)) {
+        return PyErr_NoMemory();
+    }
+    ReturnPyPolyOrFree(P)
 }
 
 static PyObject*
@@ -240,7 +275,7 @@ PyPoly_neg(PyPoly_PolynomialObject *self)
     if (!poly_neg(&(self->poly), &P)) {
         return PyErr_NoMemory();
     }
-    return (PyObject*)NewPoly(0, &P);
+    ReturnPyPolyOrFree(P)
 }
 
 static PyObject*
@@ -269,7 +304,7 @@ PyPoly_pow(PyPoly_PolynomialObject *self, PyObject *pyexp, PyObject *pymod)
     if (!poly_pow(&(self->poly), exponent, &P)) {
         return PyErr_NoMemory();
     }
-    return (PyObject*)NewPoly(0, &P);
+    ReturnPyPolyOrFree(P)
 }
 
 static PyObject*
@@ -289,11 +324,7 @@ PyPoly_remain(PyObject *self, PyObject *other)
         }
         return PyErr_NoMemory();
     }
-    PyObject *p;
-    if ((p = (PyObject*)NewPoly(0, &R)) == NULL) {
-        return NULL;
-    }
-    return p;
+    ReturnPyPolyOrFree(R)
 }
 
 static PyObject*
@@ -315,9 +346,11 @@ PyPoly_divmod(PyObject *self, PyObject *other)
     }
     PyObject *p1, *p2, *t;
     if ((p1 = (PyObject*)NewPoly(0, &Q)) == NULL) {
+        poly_free(&Q);
         return NULL;
     }
     if ((p2 = (PyObject*)NewPoly(0, &R)) == NULL) {
+        poly_free(&R);
         Py_DECREF(p1);
         return NULL;
     }
@@ -327,6 +360,26 @@ PyPoly_divmod(PyObject *self, PyObject *other)
         return NULL;
     }
     return t;
+}
+
+static PyObject*
+PyPoly_floordiv(PyObject *self, PyObject *other)
+{   /* Same as PyPoly_divmod, we just discard R */
+    PYPOLY_BINARYFUNC_HEADER
+    Polynomial Q, R;
+    int res = poly_div(&A, &B, &Q, &R);
+    if (res != 1) {
+        if (A_status == EXTRACT_CREATED) poly_free(&A);
+        if (B_status == EXTRACT_CREATED) poly_free(&B);
+        if (res == -1) {
+            PyErr_SetString(PyExc_ZeroDivisionError,
+                            "Polynomial Euclidean division by"
+                            " zero is undefined");
+            return NULL;
+        }
+        return PyErr_NoMemory();
+    }
+    ReturnPyPolyOrFree(Q)
 }
 
 static PyObject*
@@ -363,44 +416,40 @@ PyPoly_members[] = {
 };
 
 static PyNumberMethods PyPoly_NumberMethods = {
-     (binaryfunc)PyPoly_add,    /* nb_add */
-     (binaryfunc)PyPoly_sub,    /* nb_subtract */
-     (binaryfunc)PyPoly_mult,   /* nb_multiply */
-     (binaryfunc)PyPoly_remain, /* nb_remainder */
-     (binaryfunc)PyPoly_divmod, /* nb_divmod */
-     (ternaryfunc)PyPoly_pow,   /* nb_power */
-     (unaryfunc)PyPoly_neg,     /* nb_negative */
-     (unaryfunc)PyPoly_copy     /* nb_positive */
-     /*
-     unaryfunc nb_absolute;
-     inquiry nb_bool;
-     unaryfunc nb_invert;
-     binaryfunc nb_lshift;
-     binaryfunc nb_rshift;
-     binaryfunc nb_and;
-     binaryfunc nb_xor;
-     binaryfunc nb_or;
-     unaryfunc nb_int;
-     void *nb_reserved;
-     unaryfunc nb_float;
-
-     binaryfunc nb_inplace_add;
-     binaryfunc nb_inplace_subtract;
-     binaryfunc nb_inplace_multiply;
-     binaryfunc nb_inplace_remainder;
-     ternaryfunc nb_inplace_power;
-     binaryfunc nb_inplace_lshift;
-     binaryfunc nb_inplace_rshift;
-     binaryfunc nb_inplace_and;
-     binaryfunc nb_inplace_xor;
-     binaryfunc nb_inplace_or;
-
-     binaryfunc nb_floor_divide;
-     binaryfunc nb_true_divide;
-     binaryfunc nb_inplace_floor_divide;
-     binaryfunc nb_inplace_true_divide;
-
-     unaryfunc nb_index;*/
+    (binaryfunc)PyPoly_add,    /* nb_add */
+    (binaryfunc)PyPoly_sub,    /* nb_subtract */
+    (binaryfunc)PyPoly_mult,   /* nb_multiply */
+    (binaryfunc)PyPoly_remain, /* nb_remainder */
+    (binaryfunc)PyPoly_divmod, /* nb_divmod */
+    (ternaryfunc)PyPoly_pow,   /* nb_power */
+    (unaryfunc)PyPoly_neg,     /* nb_negative */
+    (unaryfunc)PyPoly_copy,     /* nb_positive */
+    0,                    /* nb_absolute */
+    0,                    /* nb_bool; */
+    0,                    /* nb_invert; */
+    0,                    /* nb_lshift; */
+    0,                    /* nb_rshift; */
+    0,                    /* nb_and; */
+    0,                    /* nb_xor; */
+    0,                    /* nb_or; */
+    0,                    /* nb_int; */
+    0,                    /* nb_reserved; */
+    0,                    /* nb_float; */
+    0,                    /* nb_inplace_add; */
+    0,                    /* nb_inplace_subtract; */
+    0,                    /* nb_inplace_multiply; */
+    0,                    /* nb_inplace_remainder; */
+    0,                    /* nb_inplace_power; */
+    0,                    /* nb_inplace_lshift; */
+    0,                    /* nb_inplace_rshift; */
+    0,                    /* nb_inplace_and; */
+    0,                    /* nb_inplace_xor; */
+    0,                    /* nb_inplace_or; */
+    (binaryfunc)PyPoly_floordiv,          /* nb_floor_divide; */
+    (binaryfunc)PyPoly_div, /* nb_true_divide; */
+    0,                    /* nb_inplace_floor_divide; */
+    0,                    /* nb_inplace_true_divide; */
+    0                    /* nb_index; */
 };
 
 static PySequenceMethods PyPoly_as_sequence = {
@@ -484,6 +533,7 @@ PyInit_pypoly(void)
     }
     PyPoly_PolynomialObject *PyPoly_X;
     if ((PyPoly_X = NewPoly(0, &X)) == NULL) {
+        poly_free(&X);
         return NULL;
     }
     Py_INCREF(PyPoly_X);

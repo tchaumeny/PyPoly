@@ -43,6 +43,8 @@ int poly_sub(Polynomial *A, Polynomial *B, Polynomial *R);
 
 int poly_neg(Polynomial *A, Polynomial *R);
 
+int poly_scal_multiply(Polynomial *A, Complex c, Polynomial *R);
+
 int poly_multiply(Polynomial *A, Polynomial *B, Polynomial *R);
 
 int poly_pow(Polynomial *A, unsigned int n, Polynomial *R);

@@ -64,10 +64,17 @@ class MultiplicationTestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             X * {}
 
+class DivisionTestCase(unittest.TestCase):
+    def test_polynomials(self):
+        self.assertEqual(X / 1j, - 1j * X)
+
+    def test_error_divide_by_poly(self):
+        with self.assertRaises(TypeError):
+            1 / X
+
 class PowerTestCase(unittest.TestCase):
     def test_polynomials(self):
         self.assertEqual((1 + X)**2, 1 + 2 * X + X**2)
-
 
 class DivmodTestCase(unittest.TestCase):
     def test_polynomials_divmod(self):
@@ -76,10 +83,12 @@ class DivmodTestCase(unittest.TestCase):
     def test_polynomials_mod(self):
         self.assertEqual((1 + X + X**2) % (X + 1), 1)
 
+    def test_polynomials_eucdiv(self):
+        self.assertEqual((1 + X + X**2) // (X + 1), X)
+
     def test_divzero_error(self):
         with self.assertRaises(ZeroDivisionError):
             X % 0
-
 
 if __name__ == '__main__':
     unittest.main()
