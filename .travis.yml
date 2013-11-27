@@ -2,10 +2,10 @@ language: python
 python:
   - "3.2"
   - "3.3"
-# command to install dependencies
 install:
   - "python setup.py install"
-# command to run tests
+  - "pip install pylint"
 script:
+  - "pylint tests --errors-only"
   - "python -m doctest -v ./README.md"
   - "python -m unittest"

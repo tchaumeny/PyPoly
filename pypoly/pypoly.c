@@ -260,6 +260,11 @@ PyPoly_div(PyObject *self, PyObject *other)
         default:
             Py_RETURN_NOTIMPLEMENTED;
     }
+    if (c.real == 0. && c.imag == 0.) {
+        PyErr_SetString(PyExc_ZeroDivisionError,
+                        "Cannot divide Polynomial by zero");
+        return NULL;
+    }
     c = _Py_c_quot(COne, c);
     Polynomial P;
     if(!poly_scal_multiply(&(((PyPoly_PolynomialObject*)self)->poly), c, &P)) {

@@ -40,6 +40,9 @@ class ComparisonTestCase(unittest.TestCase):
             X >= X
 
 class AdditionTestCase(unittest.TestCase):
+    def test_positive_op(self):
+        self.assertEqual(+X, X)
+
     def test_constant_float(self):
         self.assertEqual(Polynomial(1, 2) + 0.5, Polynomial(1.5, 2))
 
@@ -55,7 +58,29 @@ class AdditionTestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             X + {}
 
+class SubsctractionTestCase(unittest.TestCase):
+    def test_negative_op(self):
+        self.assertEqual(-Polynomial(-1, -1), Polynomial(1, 1))
+
+    def test_constant_float(self):
+        self.assertEqual(Polynomial(1, 2) - 0.5, Polynomial(0.5, 2))
+
+    def test_constant_complex(self):
+        self.assertEqual(Polynomial(1, 2) - complex(0, 0.5),
+            Polynomial(complex(1, -0.5), 2))
+
+    def test_polynomials(self):
+        self.assertEqual(Polynomial(1, 2, 0.5) - Polynomial(2, 3),
+            -1 - X + 0.5 * X**2)
+
+    def test_error_incompatible(self):
+        with self.assertRaises(TypeError):
+            X - {}
+
 class MultiplicationTestCase(unittest.TestCase):
+    def test_constant(self):
+        self.assertEqual(2 * Polynomial(1, 1), Polynomial(2, 2))
+
     def test_polynomials(self):
         self.assertEqual((1 + X + 2 * X**2) * (complex(-2, 1) * X - 2),
             -2 + complex(-4, 1) * X + (-6+1j) * X**2 + complex(-4, 2) * X**3)
@@ -72,9 +97,24 @@ class DivisionTestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             1 / X
 
+    def test_zerodiverror(self):
+        with self.assertRaises(ZeroDivisionError):
+            X / 0
+
 class PowerTestCase(unittest.TestCase):
-    def test_polynomials(self):
+    def test_positive(self):
         self.assertEqual((1 + X)**2, 1 + 2 * X + X**2)
+
+    def test_zero(self):
+        self.assertEqual((1 + X)**0, 1)
+
+    def test_error_neg(self):
+        with self.assertRaises(TypeError):
+            (1 + X)**-1
+
+    def test_error_pow_poly(self):
+        with self.assertRaises(TypeError):
+            X**X
 
 class DivmodTestCase(unittest.TestCase):
     def test_polynomials_divmod(self):
@@ -89,6 +129,24 @@ class DivmodTestCase(unittest.TestCase):
     def test_divzero_error(self):
         with self.assertRaises(ZeroDivisionError):
             X % 0
+
+class SequenceTestCase(unittest.TestCase):
+    def test_get_item(self):
+        self.assertEqual((1 + 2 * X + 3 * X**2)[1], 2)
+
+    def test_get_item_gt_deg(self):
+        self.assertEqual((1 + 2 * X + 3 * X**2)[3], 0)
+
+class CallTestCase(unittest.TestCase):
+    def test_constant(self):
+        self.assertEqual(Polynomial(1, 0, 0)(2), 1)
+
+    def test_polynomials(self):
+        self.assertEqual(Polynomial(1, 2, 3)(2), 17)
+
+    def test_error_incompatible(self):
+        with self.assertRaises(TypeError):
+            Polynomial({})
 
 if __name__ == '__main__':
     unittest.main()
