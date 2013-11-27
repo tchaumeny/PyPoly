@@ -14,7 +14,8 @@ pypoly_module = Extension(
                     "pypoly",
                     ["pypoly/polynomials.c", "pypoly/pypoly.c"],
                     define_macros=[
-                        ('PYPOLY_VERSION', pypoly_version)])
+                        ('PYPOLY_VERSION', pypoly_version)],
+                    extra_compile_args=["-pedantic"])
 
 setup(name="PyPolynomial",
       description="Python polynomial C extension.",

@@ -17,8 +17,8 @@ typedef struct {
  * (1 + degree) * 8 bytes of memory. This shouldn't be a problem in common
  * use cases. */
 typedef struct {
-    int deg;
     Complex* coef;
+    int deg;
 } Polynomial;
 
 int poly_init(Polynomial *P, int deg);
@@ -57,7 +57,7 @@ int poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R);
  * 'failure' flag is set to 1 in case of memory allocation error. */
 #define Poly_InitConst(P, c, failure)           \
     if (poly_init((P), 0))                      \
-        poly_set_coef((P), 0, (Complex)(c));    \
+        poly_set_coef((P), 0, (c));             \
     else                                        \
         failure = 1;
 
