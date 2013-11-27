@@ -1,0 +1,4 @@
+include README.md LICENSE
+recursive-include pypoly *.h *.c
+recursive-include tests *.py
+prune benchmark.py

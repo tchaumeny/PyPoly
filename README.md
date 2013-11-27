@@ -3,14 +3,16 @@ pypoly: Python Polynomials
 
 A Python extension written in C, implementing the `Polynomial` type.
 
-*Work in progress*
+*Requires Python 3*
 
 Installation
 ------------
 
     python setup.py install
 
-*Requires Python 3*
+Or:
+
+    pip install PyPolynomial
 
 Usage
 -----
