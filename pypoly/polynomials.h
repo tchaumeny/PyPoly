@@ -62,7 +62,10 @@ int poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R);
         failure = 1;
 
 extern const Complex CZero, COne;
-#define Poly_GetCoef(P, i)      ((int)(i)>(P)->deg?CZero:(P)->coef[(int)(i)])
+
+#define Poly_GetCoef(P, i)                                 \
+    (((int)(i) > (P)->deg) ? CZero : (P)->coef[(int)(i)])
+
 #define Poly_LeadCoef(P)        (((P)->deg==-1)?CZero:(P)->coef[(P)->deg])
 
 #endif

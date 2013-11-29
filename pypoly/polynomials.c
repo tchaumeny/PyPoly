@@ -87,7 +87,7 @@ static inline Complex complex_div(Complex a, Complex b) {
 
 /* This macro recomputes the degree of the Polynomial pointed by P.
  * To be called after some operation modifying the leading coefficient. */
-#define Poly_Resize(P)                                                  \
+#define Poly_ResizeDown(P)                                                  \
     while ((P)->deg != -1 && complex_iszero((P)->coef[(P)->deg])) {     \
         --((P)->deg);                                                   \
     }
@@ -211,13 +211,23 @@ char* poly_to_string(Polynomial *P) {
     }
 }
 
+static inline void _poly_set_coef(Polynomial *P, int i, Complex c) {
+    P->coef[i] = c;
+}
+
+static inline void _poly_incr_coef(Polynomial *P, int i, Complex c) {
+    /* /!\ i should be <= allocated */
+    P->coef[i].real += c.real;
+    P->coef[i].imag += c.imag;
+}
+
 void poly_set_coef(Polynomial *P, int i, Complex c) {
     /* /!\ i should be <= allocated */
-    P->coef[i] = c;
+    _poly_set_coef(P, i, c);
     if (i > P->deg && !complex_iszero(c)) {
         P->deg = i;
-    } else {
-        Poly_Resize(P);
+    } else if (i == P->deg) {
+        Poly_ResizeDown(P);
     }
 }
 
@@ -259,9 +269,9 @@ int poly_add(Polynomial *A, Polynomial *B, Polynomial *R) {
     }
     int i;
     for (i = 0; i <= MAX(A->deg, B->deg); ++i) {
-        R->coef[i] = complex_add(Poly_GetCoef(A, i), Poly_GetCoef(B, i));
+        _poly_set_coef(R, i, complex_add(Poly_GetCoef(A, i), Poly_GetCoef(B, i)));
     }
-    Poly_Resize(R);
+    Poly_ResizeDown(R);
     return 1;
 }
 
@@ -271,9 +281,9 @@ int poly_sub(Polynomial *A, Polynomial *B, Polynomial *R) {
     }
     int i;
     for (i = 0; i <= MAX(A->deg, B->deg); ++i) {
-        R->coef[i] = complex_sub(Poly_GetCoef(A, i), Poly_GetCoef(B, i));
+        _poly_set_coef(R, i, complex_sub(Poly_GetCoef(A, i), Poly_GetCoef(B, i)));
     }
-    Poly_Resize(R);
+    Poly_ResizeDown(R);
     return 1;
 }
 
@@ -283,7 +293,7 @@ int poly_neg(Polynomial *A, Polynomial *Q) {
     }
     int i;
     for (i = 0; i <= A->deg; ++i) {
-        Q->coef[i] = complex_neg(A->coef[i]);
+        _poly_set_coef(Q, i, complex_neg(A->coef[i]));
     }
     return 1;
 }
@@ -294,9 +304,9 @@ int poly_scal_multiply(Polynomial *A, Complex c, Polynomial *R) {
     }
     int i;
     for (i = 0; i <= A->deg; ++i) {
-        R->coef[i] = complex_mult(Poly_GetCoef(A, i), c);
+        _poly_set_coef(R, i, complex_mult(Poly_GetCoef(A, i), c));
     }
-    Poly_Resize(R);
+    Poly_ResizeDown(R);
     return 1;
 }
 
@@ -306,12 +316,9 @@ int poly_multiply(Polynomial *A, Polynomial *B, Polynomial *R) {
         return 0;
     }
     int i, j;
-    Complex tmp;
     for (i = 0; i <= A->deg + B->deg; ++i) {
         for (j = 0; j <= i; ++j) {
-            tmp = complex_mult(Poly_GetCoef(A, j), Poly_GetCoef(B, i - j));
-            (R->coef[i]).real += tmp.real;
-            (R->coef[i]).imag += tmp.imag;
+            _poly_incr_coef(R, i, complex_mult(Poly_GetCoef(A, j), Poly_GetCoef(B, i - j)));
         }
     }
     return 1;
@@ -346,7 +353,7 @@ int poly_derive(Polynomial *A, Polynomial *R) {
     }
     int i;
     for (i = 0; i <= A->deg - 1; ++i) {
-        R->coef[i] = complex_mult((Complex){i + 1, 0}, A->coef[i + 1]);
+        _poly_set_coef(R, i, complex_mult((Complex){i + 1, 0}, A->coef[i + 1]));
     }
     return 1;
 }
@@ -376,7 +383,7 @@ int poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R) {
 
     while (R->deg - B->deg >= 0) {
         if (!poly_init(&T1, R->deg - B->deg)) goto error;
-        poly_set_coef(&T1, R->deg - B->deg,
+        _poly_set_coef(&T1, R->deg - B->deg,
                       complex_div(Poly_LeadCoef(R), B_leadcoef));
 
         if (Q != NULL) {
