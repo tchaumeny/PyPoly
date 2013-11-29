@@ -58,7 +58,7 @@ class AdditionTestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             X + {}
 
-class SubsctractionTestCase(unittest.TestCase):
+class SubstractionTestCase(unittest.TestCase):
     def test_negative_op(self):
         self.assertEqual(-Polynomial(-1, -1), Polynomial(1, 1))
 
