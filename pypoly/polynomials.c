@@ -87,7 +87,7 @@ static inline Complex complex_div(Complex a, Complex b) {
 
 /* This macro recomputes the degree of the Polynomial pointed by P.
  * To be called after some operation modifying the leading coefficient. */
-#define Poly_ResizeDown(P)                                                  \
+#define Poly_ResizeDown(P)                                              \
     while ((P)->deg != -1 && complex_iszero((P)->coef[(P)->deg])) {     \
         --((P)->deg);                                                   \
     }
@@ -103,6 +103,7 @@ int poly_init(Polynomial *P, int deg) {
         return 0;
     }
     P->deg = deg;
+    P->bloom = 0;
     return 1;
 }
 
@@ -112,11 +113,32 @@ void poly_free(Polynomial *P) {
     P->coef = NULL;
 }
 
+static inline void _poly_set_coef(Polynomial *P, int i, Complex c) {
+    if (!complex_iszero(c)) P->bloom |= Poly_BloomMask(i);
+    P->coef[i] = c;
+}
+
+static inline void _poly_incr_coef(Polynomial *P, int i, Complex c) {
+    if (!complex_iszero(c)) P->bloom |= Poly_BloomMask(i);
+    P->coef[i].real += c.real;
+    P->coef[i].imag += c.imag;
+}
+
+void poly_set_coef(Polynomial *P, int i, Complex c) {
+    /* /!\ i should be <= allocated */
+    _poly_set_coef(P, i, c);
+    if (i > P->deg && !complex_iszero(c)) {
+        P->deg = i;
+    } else if (i == P->deg) {
+        Poly_ResizeDown(P);
+    }
+}
+
 int poly_initX(Polynomial *P) {
     if (!poly_init(P, 1)) {
         return 0;
     }
-    poly_set_coef(P, 1, COne);
+    _poly_set_coef(P, 1, COne);
     return 1;
 }
 
@@ -211,27 +233,6 @@ char* poly_to_string(Polynomial *P) {
     }
 }
 
-static inline void _poly_set_coef(Polynomial *P, int i, Complex c) {
-    P->coef[i] = c;
-}
-
-static inline void _poly_incr_coef(Polynomial *P, int i, Complex c) {
-    /* /!\ i should be <= allocated */
-    P->coef[i].real += c.real;
-    P->coef[i].imag += c.imag;
-}
-
-void poly_set_coef(Polynomial *P, int i, Complex c) {
-    /* /!\ i should be <= allocated */
-    _poly_set_coef(P, i, c);
-    if (i > P->deg && !complex_iszero(c)) {
-        P->deg = i;
-    } else if (i == P->deg) {
-        Poly_ResizeDown(P);
-    }
-}
-
-
 /* Polynomial evaluation at a given point using Horner's method.
  * Performs O(deg P) operations (naïve approach is quadratic).
  * See http://en.wikipedia.org/wiki/Horner%27s_method */
@@ -260,6 +261,7 @@ int poly_copy(Polynomial *A, Polynomial *P) {
         return 0;
     }
     memcpy(P->coef, A->coef, (A->deg + 1) * sizeof(Complex));
+    P->bloom = A->bloom;
     return 1;
 }
 
@@ -304,7 +306,9 @@ int poly_scal_multiply(Polynomial *A, Complex c, Polynomial *R) {
     }
     int i;
     for (i = 0; i <= A->deg; ++i) {
-        _poly_set_coef(R, i, complex_mult(Poly_GetCoef(A, i), c));
+        if (A->bloom & Poly_BloomMask(i)) {
+            _poly_set_coef(R, i, complex_mult(Poly_GetCoef(A, i), c));
+        }
     }
     Poly_ResizeDown(R);
     return 1;
@@ -318,7 +322,9 @@ int poly_multiply(Polynomial *A, Polynomial *B, Polynomial *R) {
     int i, j;
     for (i = 0; i <= A->deg + B->deg; ++i) {
         for (j = 0; j <= i; ++j) {
-            _poly_incr_coef(R, i, complex_mult(Poly_GetCoef(A, j), Poly_GetCoef(B, i - j)));
+            if ((A->bloom & Poly_BloomMask(j)) && (B->bloom & Poly_BloomMask(i - j))) {
+                _poly_incr_coef(R, i, complex_mult(Poly_GetCoef(A, j), Poly_GetCoef(B, i - j)));
+            }
         }
     }
     return 1;

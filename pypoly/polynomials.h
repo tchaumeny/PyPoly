@@ -1,6 +1,8 @@
 #ifndef POLYNOMIALS_H
 #define POLYNOMIALS_H
 
+#include <stdint.h>
+
 #ifndef PYPOLY_VERSION
 typedef struct {
     double real;
@@ -19,6 +21,7 @@ typedef struct {
 typedef struct {
     Complex* coef;
     int deg;
+    uint32_t bloom;
 } Polynomial;
 
 int poly_init(Polynomial *P, int deg);
@@ -63,8 +66,12 @@ int poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R);
 
 extern const Complex CZero, COne;
 
-#define Poly_GetCoef(P, i)                                 \
-    (((int)(i) > (P)->deg) ? CZero : (P)->coef[(int)(i)])
+#define Poly_BloomMask(i)                       \
+    (0x00000001 << ((i) & 0x0000001f))
+
+#define Poly_GetCoef(P, i)                                          \
+    (((int)(i) > (P)->deg || !(Poly_BloomMask(i) & (P)->bloom))     \
+        ? CZero : (P)->coef[(int)(i)])
 
 #define Poly_LeadCoef(P)        (((P)->deg==-1)?CZero:(P)->coef[(P)->deg])
 
