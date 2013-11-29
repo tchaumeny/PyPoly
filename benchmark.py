@@ -4,10 +4,10 @@ import time
 from pypoly import Polynomial, X
 
 sparse_polynomial1 = Polynomial(0, 0, -3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 5)
-sparse_polynomial2 = sparse_polynomial1 * X**2 + 1
+sparse_polynomial2 = Polynomial(0, 0, -3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 5, 0, 9)
 
 dense_polynomial1 = Polynomial(1, -8, -3, 2, 5, 1, -1, 9, 8, 2, 3, 4, 5)
-dense_polynomial2 = dense_polynomial1 * X**2 + 1
+dense_polynomial2 = Polynomial(1, -8, -3, 2, 5, 1, -1, 9, 8, 2, 3, 4, 5, -7, 8)
 
 def add_sparse():
     sparse_polynomial1 + sparse_polynomial2
@@ -18,6 +18,9 @@ def mult_sparse():
 def power_sparse():
     sparse_polynomial1**3
     sparse_polynomial2**4
+
+def compare_sparse():
+    sparse_polynomial1 == sparse_polynomial2
 
 def modulo_sparse():
     divmod(sparse_polynomial2, sparse_polynomial1)
@@ -32,6 +35,9 @@ def power_dense():
     dense_polynomial1**3
     dense_polynomial2**4
 
+def compare_dense():
+    dense_polynomial1 == dense_polynomial2
+
 def modulo_dense():
     divmod(dense_polynomial2, dense_polynomial1)
 
@@ -43,10 +49,12 @@ BENCHMARK = (
         (mult_sparse, 2 * 10**6),
         (power_sparse, 2 * 10**5),
         (modulo_sparse, 2 * 10**6),
+        (compare_sparse, 2 * 10**7),
         (add_dense, 10**7),
         (mult_dense, 2 * 10**6),
         (power_dense, 2 * 10**5),
         (modulo_dense, 2 * 10**6),
+        (compare_dense, 10**7),
         (X_op, 10**6),
     )
 
