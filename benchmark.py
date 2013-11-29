@@ -1,7 +1,7 @@
 import sys
 import time
 
-from pypoly import *
+from pypoly import Polynomial, X
 
 sparse_polynomial1 = Polynomial(0, 0, -3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 5)
 sparse_polynomial2 = sparse_polynomial1 * X**2 + 1

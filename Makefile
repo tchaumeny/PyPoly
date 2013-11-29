@@ -12,7 +12,7 @@ install:
 build: clean install
 
 pylint:
-	pylint tests/ benchmark.py setup.py --errors-only
+	pylint tests/ benchmark.py --errors-only
 
 doctest:
 	$(PYTHON) -m doctest README.md -v
