@@ -25,6 +25,9 @@ def compare_sparse():
 def modulo_sparse():
     divmod(sparse_polynomial2, sparse_polynomial1)
 
+def evaluate_sparse():
+    sparse_polynomial1(10)
+
 def add_dense():
     dense_polynomial1 + dense_polynomial2
 
@@ -41,6 +44,9 @@ def compare_dense():
 def modulo_dense():
     divmod(dense_polynomial2, dense_polynomial1)
 
+def evaluate_dense():
+    dense_polynomial1(10)
+
 def X_op():
     1 + X + X**2 + X**3 + X**4 + X**5 + X**6
 
@@ -50,11 +56,12 @@ BENCHMARK = (
         (power_sparse, 2 * 10**5),
         (modulo_sparse, 2 * 10**6),
         (compare_sparse, 2 * 10**7),
+        (evaluate_sparse, 10**7),
         (add_dense, 10**7),
         (mult_dense, 2 * 10**6),
         (power_dense, 2 * 10**5),
-        (modulo_dense, 2 * 10**6),
-        (compare_dense, 10**7),
+        (modulo_dense, 10**6),
+        (evaluate_dense, 10**7),
         (X_op, 10**6),
     )
 
