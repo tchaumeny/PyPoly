@@ -203,6 +203,9 @@ PyPoly_repr(PyPoly_PolynomialObject *self)
             return PyErr_NoMemory();                        \
         }                                                   \
     }
+#define PYPOLY_BINARYFUNC_FOOTER                            \
+    if (A_status == EXTRACT_CREATED) poly_free(&A);         \
+    if (B_status == EXTRACT_CREATED) poly_free(&B);
 
 static PyObject*
 PyPoly_add(PyObject *self, PyObject *other)
@@ -214,6 +217,7 @@ PyPoly_add(PyObject *self, PyObject *other)
         if (B_status == EXTRACT_CREATED) poly_free(&B);
         return PyErr_NoMemory();
     }
+    PYPOLY_BINARYFUNC_FOOTER
     ReturnPyPolyOrFree(R)
 }
 
@@ -227,6 +231,7 @@ PyPoly_sub(PyObject *self, PyObject *other)
         if (B_status == EXTRACT_CREATED) poly_free(&B);
         return PyErr_NoMemory();
     }
+    PYPOLY_BINARYFUNC_FOOTER
     ReturnPyPolyOrFree(R)
 }
 
@@ -240,6 +245,7 @@ PyPoly_mult(PyObject *self, PyObject *other)
         if (B_status == EXTRACT_CREATED) poly_free(&B);
         return PyErr_NoMemory();
     }
+    PYPOLY_BINARYFUNC_FOOTER
     ReturnPyPolyOrFree(R)
 }
 
@@ -332,6 +338,7 @@ PyPoly_remain(PyObject *self, PyObject *other)
         }
         return PyErr_NoMemory();
     }
+    PYPOLY_BINARYFUNC_FOOTER
     ReturnPyPolyOrFree(R)
 }
 
@@ -352,6 +359,7 @@ PyPoly_divmod(PyObject *self, PyObject *other)
         }
         return PyErr_NoMemory();
     }
+    PYPOLY_BINARYFUNC_FOOTER
     PyObject *p1, *p2, *t;
     if ((p1 = (PyObject*)NewPoly(0, &Q)) == NULL) {
         poly_free(&Q);
@@ -387,6 +395,8 @@ PyPoly_floordiv(PyObject *self, PyObject *other)
         }
         return PyErr_NoMemory();
     }
+    poly_free(&R);
+    PYPOLY_BINARYFUNC_FOOTER
     ReturnPyPolyOrFree(Q)
 }
 
@@ -397,9 +407,11 @@ PyPoly_compare(PyObject *self, PyObject *other, int opid)
         Py_RETURN_NOTIMPLEMENTED;
     }
     PYPOLY_BINARYFUNC_HEADER
-    if ((poly_equal(&A, &B) && opid == Py_EQ)
-            ||
-        (!poly_equal(&A, &B) && opid == Py_NE)) {
+    int ret = (poly_equal(&A, &B) && opid == Py_EQ)
+                    ||
+              (!poly_equal(&A, &B) && opid == Py_NE);
+    PYPOLY_BINARYFUNC_FOOTER
+    if (ret) {
         Py_RETURN_TRUE;
     } else {
         Py_RETURN_FALSE;
@@ -418,9 +430,9 @@ PyPoly_getitem(PyPoly_PolynomialObject *self, Py_ssize_t i)
 
 static PyMemberDef
 PyPoly_members[] = {
-   {"degree", T_INT, offsetof(PyPoly_PolynomialObject, poly) + offsetof(Polynomial, deg),
-    READONLY, "The degree of the Polynomial instance." },
-   { NULL }
+    {"degree", T_INT, offsetof(PyPoly_PolynomialObject, poly) + offsetof(Polynomial, deg),
+     READONLY, "The degree of the Polynomial instance."},
+    { NULL }
 };
 
 static PyNumberMethods PyPoly_NumberMethods = {
