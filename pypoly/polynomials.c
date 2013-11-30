@@ -424,9 +424,9 @@ int poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R) {
     }
     return 1;
 error:
-    if (Q != NULL && Q->coef != NULL) poly_free(Q);
-    if (R->coef != NULL) poly_free(R);
-    if (T1.coef != NULL) poly_free(&T1);
-    if (T2.coef != NULL) poly_free(&T2);
+    if (Q != NULL) poly_free(Q);
+    poly_free(R);
+    poly_free(&T1);
+    poly_free(&T2);
     return 0;
 }
