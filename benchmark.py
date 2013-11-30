@@ -69,7 +69,7 @@ def bench_func(func, times=None):
     if times is None:
         times = 10**6
     step = times // 100
-    print("[ Calling \"%s\" %g times]" % (func.__name__, times))
+    print("[ Calling \"%s\" %s times]" % (func.__name__, times))
     before = time.time()
     for i in range(times):
         func()
