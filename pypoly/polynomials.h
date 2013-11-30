@@ -58,10 +58,17 @@ int poly_integrate(Polynomial *A, unsigned int n, Polynomial *R);
 
 int poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R);
 
+/* Common Macros / inline helpers */
+
+static inline int complex_iszero(Complex c) {
+    return (c.real == 0. && c.imag == 0.);
+}
 /* Macro to initialize the Polynomial pointed by P to the constant Polynomial c.
  * 'failure' flag is set to 1 in case of memory allocation error. */
 #define Poly_InitConst(P, c, failure)           \
-    if (poly_init((P), 0))                      \
+    if (complex_iszero(c))                      \
+        poly_init((P), -1);                     \
+    else if (poly_init((P), 0))                 \
         poly_set_coef((P), 0, (c));             \
     else                                        \
         failure = 1;

@@ -39,6 +39,10 @@ class ComparisonTestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             X >= X
 
+    def test_nonreg_zeromultiply(self):
+        """Non-regression, multiplication by zero did not set degree to -1."""
+        self.assertEqual(0 * X, 0)
+
 class AdditionTestCase(unittest.TestCase):
     def test_positive_op(self):
         self.assertEqual(+X, X)

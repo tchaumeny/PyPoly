@@ -31,10 +31,6 @@ const Complex CZero = {0., 0.}, COne = {1., 0.};
 /* Check if a complex number equals (0,0).
  * We ignore double precision related errors which shouldn't be a problem
  * in common use cases. */
-static inline int complex_iszero(Complex c) {
-    return (c.real == 0. && c.imag == 0.);
-}
-
 #ifndef PYPOLY_VERSION
 static inline Complex complex_add(Complex a, Complex b) {
     return (Complex){
@@ -301,6 +297,10 @@ int poly_neg(Polynomial *A, Polynomial *Q) {
 }
 
 int poly_scal_multiply(Polynomial *A, Complex c, Polynomial *R) {
+    if (complex_iszero(c)) {
+        poly_init(R, -1);
+        return 1;
+    }
     if (!poly_init(R, A->deg)) {
         return 0;
     }
@@ -310,12 +310,15 @@ int poly_scal_multiply(Polynomial *A, Complex c, Polynomial *R) {
             _poly_set_coef(R, i, complex_mult(Poly_GetCoef(A, i), c));
         }
     }
-    Poly_ResizeDown(R);
     return 1;
 }
 
 int poly_multiply(Polynomial *A, Polynomial *B, Polynomial *R) {
     // TODO: implement faster algo
+    if (A->deg == -1 || B->deg == -1) {
+        poly_init(R, -1);
+        return 1;
+    }
     if (!poly_init(R, A->deg + B->deg)) {
         return 0;
     }
