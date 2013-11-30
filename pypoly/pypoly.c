@@ -170,11 +170,14 @@ static PyObject*
 PyPoly_repr(PyPoly_PolynomialObject *self)
 {
     char* str = poly_to_string(&(self->poly));
+    PyObject* ret;
 #if PY_VERSION_HEX >= 0x03030000
-    return PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, str, strlen(str));
+    ret = PyUnicode_FromKindAndData(PyUnicode_1BYTE_KIND, str, strlen(str));
 #else
-    return PyUnicode_FromStringAndSize(str, strlen(str));
+    ret = PyUnicode_FromStringAndSize(str, strlen(str));
 #endif
+    free(str);
+    return ret;
 }
 
 /* Macro for converting the arguments of a function into
