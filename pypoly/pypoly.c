@@ -322,6 +322,34 @@ PyPoly_pow(PyPoly_PolynomialObject *self, PyObject *pyexp, PyObject *pymod)
 }
 
 static PyObject*
+PyPoly_derive(PyPoly_PolynomialObject *self, PyObject *other)
+{
+    unsigned long steps = PyLong_AsUnsignedLong(other);
+    if (steps == -1 && PyErr_Occurred()) {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+    Polynomial P;
+    if (!poly_derive(&(self->poly), steps, &P)) {
+        return PyErr_NoMemory();
+    }
+    ReturnPyPolyOrFree(P)
+}
+
+static PyObject*
+PyPoly_integrate(PyPoly_PolynomialObject *self, PyObject *other)
+{
+    unsigned long steps = PyLong_AsUnsignedLong(other);
+    if (steps == -1 && PyErr_Occurred()) {
+        Py_RETURN_NOTIMPLEMENTED;
+    }
+    Polynomial P;
+    if (!poly_integrate(&(self->poly), steps, &P)) {
+        return PyErr_NoMemory();
+    }
+    ReturnPyPolyOrFree(P)
+}
+
+static PyObject*
 PyPoly_remain(PyObject *self, PyObject *other)
 {
     PYPOLY_BINARYFUNC_HEADER
@@ -447,8 +475,8 @@ static PyNumberMethods PyPoly_NumberMethods = {
     0,                              /* nb_absolute */
     0,                              /* nb_bool; */
     0,                              /* nb_invert; */
-    0,                              /* nb_lshift; */
-    0,                              /* nb_rshift; */
+    (binaryfunc)PyPoly_integrate,   /* nb_lshift; */
+    (binaryfunc)PyPoly_derive,      /* nb_rshift; */
     0,                              /* nb_and; */
     0,                              /* nb_xor; */
     0,                              /* nb_or; */

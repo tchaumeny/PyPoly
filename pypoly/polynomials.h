@@ -52,7 +52,9 @@ int poly_multiply(Polynomial *A, Polynomial *B, Polynomial *R);
 
 int poly_pow(Polynomial *A, unsigned int n, Polynomial *R);
 
-int poly_derive(Polynomial *A, Polynomial *R);
+int poly_derive(Polynomial *A, unsigned int n, Polynomial *R);
+
+int poly_integrate(Polynomial *A, unsigned int n, Polynomial *R);
 
 int poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R);
 

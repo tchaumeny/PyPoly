@@ -148,5 +148,39 @@ class CallTestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             Polynomial({})
 
+class DerivationTestCase(unittest.TestCase):
+    def test_derive_zero(self):
+        self.assertEqual(Polynomial(0) >> 1, 0)
+
+    def test_constant(self):
+        self.assertEqual(Polynomial(1) >> 1, 0)
+
+    def test_polynomials(self):
+        self.assertEqual(Polynomial(1, 2, 3) >> 1, Polynomial(2, 6))
+
+    def test_zero(self):
+        self.assertEqual(Polynomial(1, 2, 3) >> 0, Polynomial(1, 2, 3))
+
+    def test_error_negative(self):
+        with self.assertRaises(TypeError):
+            X >> -1
+
+class IntegrationTestCase(unittest.TestCase):
+    def test_integrate_zero(self):
+        self.assertEqual(Polynomial(0) << 1, 0)
+
+    def test_constant(self):
+        self.assertEqual(Polynomial(1) << 1, X)
+
+    def test_polynomials(self):
+        self.assertEqual(Polynomial(1, 2, 3) << 1, Polynomial(0, 1, 1, 1))
+
+    def test_zero(self):
+        self.assertEqual(Polynomial(1, 2, 3) << 0, Polynomial(1, 2, 3))
+
+    def test_error_negative(self):
+        with self.assertRaises(TypeError):
+            X << -1
+
 if __name__ == '__main__':
     unittest.main()

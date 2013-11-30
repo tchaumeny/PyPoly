@@ -9,7 +9,7 @@
  * Generic helpers
  */
 
-#define MAX(a,b)    (((a)>(b))?(a):(b))
+#define MAX(a,b)    (((int)(a)>(int)(b))?(int)(a):(int)(b))
 
 /* strdup is not part of the C standard and might not be available */
 static inline char *strduplicate(const char *s) {
@@ -353,13 +353,28 @@ int poly_pow(Polynomial *A, unsigned int n, Polynomial *R) {
     }
 }
 
-int poly_derive(Polynomial *A, Polynomial *R) {
-    if (!poly_init(R, MAX(-1, A->deg - 1))) {
+int poly_derive(Polynomial *A, unsigned int n, Polynomial *R) {
+    if (!poly_init(R, MAX(-1, A->deg - n))) {
         return 0;
     }
-    int i;
-    for (i = 0; i <= A->deg - 1; ++i) {
-        _poly_set_coef(R, i, complex_mult((Complex){i + 1, 0}, A->coef[i + 1]));
+    int i, j, multiplier;
+    for (i = 0; i <= R->deg; ++i) {
+        multiplier = 1;
+        for (j = i; j < i + n; ++j) multiplier *= j + 1;
+        _poly_set_coef(R, i, complex_mult((Complex){(double)multiplier, 0}, A->coef[j]));
+    }
+    return 1;
+}
+
+int poly_integrate(Polynomial *A, unsigned int n, Polynomial *R) {
+    if (!poly_init(R, (A->deg == -1) ? -1 : A->deg + n)) {
+        return 0;
+    }
+    int i, j, divisor;
+    for (i = n; i <= R->deg; ++i) {
+        divisor = 1;
+        for (j = i; j > i - n; --j) divisor *= j;
+        _poly_set_coef(R, i, complex_div(A->coef[j], (Complex){(double)divisor, 0}));
     }
     return 1;
 }
