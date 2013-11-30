@@ -173,7 +173,7 @@ int poly_equal(Polynomial *P, Polynomial *Q) {
 
 char* poly_to_string(Polynomial *P) {
     if (P->deg == -1) {
-        return "0";
+        return strdup("0");
     } else {
         char buffer[2048] = "";
         int i, multiplier, add_mult_sign, offset = 0;
