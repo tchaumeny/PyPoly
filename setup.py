@@ -5,10 +5,13 @@ if sys.version_info[0] < 3:
     print("PyPoly requires Python >= 3")
     sys.exit()
 
-pypoly_version = '0.1.0'
+pypoly_version = '0.2.1'
 
+long_description = ""
 with open('README.md') as f:
-    long_description = f.read()
+    for line in f:
+      if "[Build Status]" not in line:
+          long_description += line
 
 pypoly_module = Extension(
                     "pypoly",

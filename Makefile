@@ -24,3 +24,6 @@ test: doctest unittest
 
 benchmark:
 	$(PYTHON) benchmark.py
+
+release:
+	$(PYTHON) setup.py sdist upload
