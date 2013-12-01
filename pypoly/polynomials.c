@@ -28,9 +28,6 @@ static inline char *strduplicate(const char *s) {
 
 const Complex CZero = {0., 0.}, COne = {1., 0.};
 
-/* Check if a complex number equals (0,0).
- * We ignore double precision related errors which shouldn't be a problem
- * in common use cases. */
 #ifndef PYPOLY_VERSION
 static inline Complex complex_add(Complex a, Complex b) {
     return (Complex){

@@ -45,6 +45,13 @@ new_poly_st(PyTypeObject *subtype, int deg, Polynomial *P)
     return self;
 }
 #define NewPoly(deg, P)     new_poly_st(&PyPoly_PolynomialType, (int)(deg), (Polynomial*)(P))
+#define ReturnPyPolyOrFree(P)                       \
+PyObject *p;                                        \
+if ((p = (PyObject*)NewPoly(0, &P)) == NULL) {      \
+    poly_free(&P);                                  \
+    return NULL;                                    \
+}                                                   \
+return p;
 
 /* Polynomial extraction helpers.
  * Those functions deal with the problem of getting a Polynomial object out
@@ -120,13 +127,6 @@ extract_poly(PyObject *obj, Polynomial *P)
 /**
  * PyObject API implementation
  */
-#define ReturnPyPolyOrFree(P)                       \
-PyObject *p;                                        \
-if ((p = (PyObject*)NewPoly(0, &P)) == NULL) {      \
-    poly_free(&P);                                  \
-    return NULL;                                    \
-}                                                   \
-return p;
 
 static PyObject*
 PyPoly_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds)
@@ -571,10 +571,11 @@ PyInit_pypoly(void)
     if (m == NULL)
         return NULL;
 
+    /* Add "Polynomial" type to module */
     Py_INCREF(&PyPoly_PolynomialType);
     PyModule_AddObject(m, "Polynomial", (PyObject *)&PyPoly_PolynomialType);
 
-    /* Make "X" available for import */
+    /* Add "X" Polynomial to module */
     Polynomial X;
     if (!poly_initX(&X)) {
         return PyErr_NoMemory();
@@ -586,5 +587,6 @@ PyInit_pypoly(void)
     }
     Py_INCREF(PyPoly_X);
     PyModule_AddObject(m, "X", (PyObject *)PyPoly_X);
+
     return m;
 }

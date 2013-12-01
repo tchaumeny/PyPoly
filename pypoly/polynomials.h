@@ -60,6 +60,8 @@ int poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R);
 
 /* Common Macros / inline helpers */
 
+/* Check if a complex number equals (0,0).
+ * We ignore double precision related errors. */
 static inline int complex_iszero(Complex c) {
     return (c.real == 0. && c.imag == 0.);
 }
@@ -82,6 +84,7 @@ extern const Complex CZero, COne;
     (((int)(i) > (P)->deg || !(Poly_BloomMask(i) & (P)->bloom))     \
         ? CZero : (P)->coef[(int)(i)])
 
-#define Poly_LeadCoef(P)        (((P)->deg==-1)?CZero:(P)->coef[(P)->deg])
+#define Poly_LeadCoef(P)                        \
+    (((P)->deg==-1)?CZero:(P)->coef[(P)->deg])
 
 #endif
