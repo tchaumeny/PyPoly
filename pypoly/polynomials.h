@@ -58,6 +58,8 @@ int poly_integrate(Polynomial *A, unsigned int n, Polynomial *R);
 
 int poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R);
 
+int poly_gcd(Polynomial *A, Polynomial *B, Polynomial *P);
+
 /* Common Macros / inline helpers */
 
 /* Check if a complex number equals (0,0).

@@ -49,7 +49,7 @@ new_poly_st(PyTypeObject *subtype, int deg, Polynomial *P)
 PyObject *p;                                        \
 if ((p = (PyObject*)NewPoly(0, &P)) == NULL) {      \
     poly_free(&P);                                  \
-    return NULL;                                    \
+    return PyErr_NoMemory();                        \
 }                                                   \
 return p;
 
@@ -456,6 +456,40 @@ PyPoly_getitem(PyPoly_PolynomialObject *self, Py_ssize_t i)
     return PyComplex_FromCComplex(coef);
 }
 
+/* Module methods */
+
+static PyObject*
+PyPoly_gcd(PyObject *self, PyObject *args)
+{
+    int i = PyTuple_GET_SIZE(args);
+    if (i < 2) {
+        PyErr_SetString(PyExc_TypeError,
+                        "'gcd' takes two or more polynomials as arguments");
+        return NULL;
+    }
+
+    PyObject* item;
+    Polynomial P, T;
+    poly_init(&P, -1);
+    poly_init(&T, -1);
+    while (--i >= 0) {
+        item = PyTuple_GET_ITEM(args, i);
+        if(!PyPolynomial_Check(item)) {
+            poly_free(&P);
+            Py_RETURN_NOTIMPLEMENTED;
+        }
+        if (!poly_gcd(&P, &(((PyPoly_PolynomialObject*)item)->poly), &T)) goto memerror;
+        poly_free(&P);
+        if (!poly_copy(&T, &P)) goto memerror;
+        poly_free(&T);
+    }
+    ReturnPyPolyOrFree(P)
+memerror:
+    poly_free(&P);
+    poly_free(&T);
+    return PyErr_NoMemory();
+}
+
 static PyMemberDef
 PyPoly_members[] = {
     {"degree", T_INT, offsetof(PyPoly_PolynomialObject, poly) + offsetof(Polynomial, deg),
@@ -551,12 +585,19 @@ static PyTypeObject PyPoly_PolynomialType = {
     (newfunc)PyPoly_new,                /* tp_new */
 };
 
+static PyMethodDef PyPolymethods[] = {
+    {"gcd", PyPoly_gcd, METH_VARARGS,
+     "Compute the GCD of two or more polynomials."},
+    {NULL, NULL, 0, NULL}        /* Sentinel */
+};
+
 static PyModuleDef PyPolymodule = {
     PyModuleDef_HEAD_INIT,
     "pypoly",
     "Python Polynomial module implemented in C.",
     -1,
-    NULL, NULL, NULL, NULL, NULL
+    PyPolymethods,
+    NULL, NULL, NULL, NULL
 };
 
 PyMODINIT_FUNC

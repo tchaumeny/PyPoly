@@ -44,6 +44,12 @@ Or:
     X
     >>> (2 * X + 3 * X**2 + X**5 + X**7) % (X**2 + 1)
     -3 + 2 * X
+
+Even more:
+
+    >>> from pypoly import gcd
+    >>> gcd(X**6 - 1, X**12 - 1, X**9 - 1)
+    -1 + X**3
     >>> (1 + X**3 - 2 * X**5) >> 2      # Second derivative
     6 * X - 40 * X**3
 

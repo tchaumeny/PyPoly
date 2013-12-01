@@ -430,3 +430,51 @@ error:
     poly_free(&T2);
     return 0;
 }
+
+/* Greatest Common Divisor of A and B.
+ *
+ * Computes the polynomial of highest degree which divides both A and B.
+ * We add the condition that its leading coefficient should be 1 in order
+ * to have a uniquely defined GCD.
+ *
+ * The algorithm is basically :
+ *   # deg A >= deg B
+ *   While B != 0
+ *       A, B <= B, A % B   # Invariant: PGCD(A, B)
+ *   P = A
+ */
+int poly_gcd(Polynomial *A, Polynomial *B, Polynomial *P) {
+    Polynomial R, T;
+    poly_init(P, -1);
+    poly_init(&R, -1);
+    poly_init(&T, -1);
+
+    if (A->deg >= B->deg) {
+        if (!poly_copy(A, P)) goto error;
+        if (!poly_copy(B, &R)) goto error;
+    } else {
+        if (!poly_copy(B, P)) goto error;
+        if (!poly_copy(A, &R)) goto error;
+    }
+    while (R.deg != -1) {
+        if (!poly_copy(P, &T)) goto error;
+        poly_free(P);
+        if (!poly_copy(&R, P)) goto error;
+        poly_free(&R);
+        if (!poly_div(&T, P, NULL, &R)) goto error;
+        poly_free(&T);
+    }
+
+    // Result normalization - could be faster.
+    Complex factor = complex_div((Complex){1, 0}, Poly_LeadCoef(P));
+    if (!poly_copy(P, &T)) goto error;
+    poly_free(P);
+    if (!poly_scal_multiply(&T, factor, P)) goto error;
+    poly_free(&T);
+    return 1;
+error:
+    poly_free(P);
+    poly_free(&T);
+    poly_free(&R);
+    return 0;
+}
