@@ -47,17 +47,20 @@ Or:
 
 Even more:
 
+    >>> (1 + X**3 - 2 * X**5) >> 2      # Second derivative
+    6 * X - 40 * X**3
+    >>> (1 + 2 * X) << 1                # Primitive integral
+    X + X**2
     >>> from pypoly import gcd
     >>> gcd(X**6 - 1, X**12 - 1, X**9 - 1)
     -1 + X**3
-    >>> (1 + X**3 - 2 * X**5) >> 2      # Second derivative
-    6 * X - 40 * X**3
 
 Links
 -----
 
-Found a bug ? Have a feature request ? Need help ? [Ask here](https://github.com/tchaumeny/PyPoly/issues/new "New issue")
+Tracker: <https://github.com/tchaumeny/PyPoly/issues/>
 
-Project page on PyPI: [https://pypi.python.org/pypi/PyPolynomial](https://pypi.python.org/pypi/PyPolynomial)
+Project page on PyPI: <https://pypi.python.org/pypi/PyPolynomial>
 
+Projet page on GitHub: <https://github.com/tchaumeny/PyPoly>
 [![Build Status](https://travis-ci.org/tchaumeny/PyPoly.png)](https://travis-ci.org/tchaumeny/PyPoly)
