@@ -1,7 +1,7 @@
 # Conf
 PYTHON = python
 
-.PHONY: clean install build pylint doctest unittest test benchmark check
+.PHONY: clean install build pylint doctest unittest test benchmark
 
 clean:
 	rm -rf build/ tests/__pycache__ MANIFEST
@@ -24,5 +24,3 @@ test: doctest unittest
 
 benchmark:
 	$(PYTHON) benchmark.py
-
-check: pylint build test benchmark
