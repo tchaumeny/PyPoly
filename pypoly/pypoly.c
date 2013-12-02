@@ -131,6 +131,10 @@ extract_poly(PyObject *obj, Polynomial *P)
 static PyObject*
 PyPoly_new(PyTypeObject *subtype, PyObject *args, PyObject *kwds)
 {
+    if (!_PyArg_NoKeywords("__new__()", kwds)) {
+        return NULL;
+    }
+
     PyPoly_PolynomialObject *self;
     int size = PyTuple_GET_SIZE(args);
     self = new_poly_st(subtype, size - 1, NULL);
@@ -293,11 +297,11 @@ PyPoly_neg(PyPoly_PolynomialObject *self)
 }
 
 static PyObject*
-PyPoly_call(PyPoly_PolynomialObject *self, PyObject *args, PyObject *kw)
+PyPoly_call(PyPoly_PolynomialObject *self, PyObject *args, PyObject *kwds)
 {
     Py_complex x;
 
-    if (!_PyArg_NoKeywords("__call__()", kw) || !PyArg_ParseTuple(args, "D", &x)) {
+    if (!_PyArg_NoKeywords("__call__()", kwds) || !PyArg_ParseTuple(args, "D", &x)) {
         return NULL;
     }
     Py_complex y = poly_eval(&(self->poly), x);
@@ -311,7 +315,7 @@ static PyObject*
 PyPoly_pow(PyPoly_PolynomialObject *self, PyObject *pyexp, PyObject *pymod)
 {
     unsigned long exponent = PyLong_AsUnsignedLong(pyexp);
-    if (exponent == -1 && PyErr_Occurred()) {
+    if (PyErr_Occurred()) {
         Py_RETURN_NOTIMPLEMENTED;
     }
     Polynomial P;
@@ -325,7 +329,7 @@ static PyObject*
 PyPoly_derive(PyPoly_PolynomialObject *self, PyObject *other)
 {
     unsigned long steps = PyLong_AsUnsignedLong(other);
-    if (steps == -1 && PyErr_Occurred()) {
+    if (PyErr_Occurred()) {
         Py_RETURN_NOTIMPLEMENTED;
     }
     Polynomial P;
@@ -339,7 +343,7 @@ static PyObject*
 PyPoly_integrate(PyPoly_PolynomialObject *self, PyObject *other)
 {
     unsigned long steps = PyLong_AsUnsignedLong(other);
-    if (steps == -1 && PyErr_Occurred()) {
+    if (PyErr_Occurred()) {
         Py_RETURN_NOTIMPLEMENTED;
     }
     Polynomial P;
@@ -494,7 +498,7 @@ static PyMemberDef
 PyPoly_members[] = {
     {"degree", T_INT, offsetof(PyPoly_PolynomialObject, poly) + offsetof(Polynomial, deg),
      READONLY, "The degree of the Polynomial instance."},
-    { NULL }
+    { NULL, 0, 0, 0, NULL }
 };
 
 static PyNumberMethods PyPoly_NumberMethods = {
@@ -535,13 +539,16 @@ static PyNumberMethods PyPoly_NumberMethods = {
 };
 
 static PySequenceMethods PyPoly_as_sequence = {
-    0,  /* sq_length */
-    0,  /* sq_concat */
-    0,  /* sq_repeat */
-    (ssizeargfunc)PyPoly_getitem,
-    0,
-    0,  /* sq_ass_item */
-    0,
+    0,                              /* sq_length */
+    0,                              /* sq_concat */
+    0,                              /* sq_repeat */
+    (ssizeargfunc)PyPoly_getitem,   /* sq_item */
+    0,                              /* sq_slice */
+    0,                              /* sq_ass_item */
+    0,                              /* sq_ass_slice */
+    0,                              /* sq_contains */
+    0,                              /* sq_inplace_concat */
+    0                               /* sq_inplace_repeat */
 };
 
 static PyTypeObject PyPoly_PolynomialType = {

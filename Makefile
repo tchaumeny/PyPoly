@@ -7,7 +7,7 @@ clean:
 	rm -rf build/ tests/__pycache__ MANIFEST
 
 install:
-	$(PYTHON) setup.py install
+	CFLAGS="-g -Wall -Wextra -pedantic -std=c99" $(PYTHON) setup.py install
 
 build: clean install
 

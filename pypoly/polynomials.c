@@ -156,9 +156,9 @@ int poly_equal(Polynomial *P, Polynomial *Q) {
  * We traverse the coefficients and append characters to a buffer.
  * A little bit messy, but it seems to work.
  */
-#define BUFFER_AVAILABLE(buffer, offset)    \
-    (sizeof(buffer)>(int)(offset))?         \
-    (sizeof(buffer)-(int)(offset))          \
+#define BUFFER_AVAILABLE(buffer, offset)           \
+    ((int)sizeof(buffer)>(int)(offset))?           \
+    ((int)sizeof(buffer)-(int)(offset))            \
     : 0
 
 #define STR_UNKOWN              "X"
@@ -218,7 +218,7 @@ char* poly_to_string(Polynomial *P) {
                                    BUFFER_AVAILABLE(buffer, offset),
                                    "%s**%d", add_mult_sign ? " * " STR_UNKOWN : STR_UNKOWN, i);
             }
-            if (offset >= sizeof(buffer)) {
+            if (offset >= (int)sizeof(buffer)) {
                 break;
             }
         }
@@ -354,26 +354,26 @@ int poly_pow(Polynomial *A, unsigned int n, Polynomial *R) {
 }
 
 int poly_derive(Polynomial *A, unsigned int n, Polynomial *R) {
-    if (!poly_init(R, MAX(-1, A->deg - n))) {
+    if (!poly_init(R, MAX(-1, A->deg - (int)n))) {
         return 0;
     }
     int i, j, multiplier;
     for (i = 0; i <= R->deg; ++i) {
         multiplier = 1;
-        for (j = i; j < i + n; ++j) multiplier *= j + 1;
+        for (j = i; j < i + (int)n; ++j) multiplier *= j + 1;
         _poly_set_coef(R, i, complex_mult((Complex){(double)multiplier, 0}, A->coef[j]));
     }
     return 1;
 }
 
 int poly_integrate(Polynomial *A, unsigned int n, Polynomial *R) {
-    if (!poly_init(R, (A->deg == -1) ? -1 : A->deg + n)) {
+    if (!poly_init(R, (A->deg == -1) ? -1 : A->deg + (int)n)) {
         return 0;
     }
     int i, j, divisor;
     for (i = n; i <= R->deg; ++i) {
         divisor = 1;
-        for (j = i; j > i - n; --j) divisor *= j;
+        for (j = i; j > i - (int)n; --j) divisor *= j;
         _poly_set_coef(R, i, complex_div(A->coef[j], (Complex){(double)divisor, 0}));
     }
     return 1;
