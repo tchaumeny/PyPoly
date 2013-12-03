@@ -1,4 +1,4 @@
-from . import Polynomial, X
+from pypoly import Polynomial, X
 
 #
 # Chebyshev polynomials
