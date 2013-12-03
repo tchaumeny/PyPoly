@@ -600,15 +600,15 @@ static PyMethodDef PyPolymethods[] = {
 
 static PyModuleDef PyPolymodule = {
     PyModuleDef_HEAD_INIT,
-    "pypoly",
-    "Python Polynomial module implemented in C.",
+    "_pypoly",
+    "Python C extension defining the Polynomial type.",
     -1,
     PyPolymethods,
     NULL, NULL, NULL, NULL
 };
 
 PyMODINIT_FUNC
-PyInit_pypoly(void) 
+PyInit__pypoly(void) 
 {
     PyObject* m;
 
@@ -622,19 +622,6 @@ PyInit_pypoly(void)
     /* Add "Polynomial" type to module */
     Py_INCREF(&PyPoly_PolynomialType);
     PyModule_AddObject(m, "Polynomial", (PyObject *)&PyPoly_PolynomialType);
-
-    /* Add "X" Polynomial to module */
-    Polynomial X;
-    if (!poly_initX(&X)) {
-        return PyErr_NoMemory();
-    }
-    PyPoly_PolynomialObject *PyPoly_X;
-    if ((PyPoly_X = NewPoly(0, &X)) == NULL) {
-        poly_free(&X);
-        return NULL;
-    }
-    Py_INCREF(PyPoly_X);
-    PyModule_AddObject(m, "X", (PyObject *)PyPoly_X);
 
     return m;
 }

@@ -127,14 +127,6 @@ void poly_set_coef(Polynomial *P, int i, Complex c) {
     }
 }
 
-int poly_initX(Polynomial *P) {
-    if (!poly_init(P, 1)) {
-        return 0;
-    }
-    _poly_set_coef(P, 1, COne);
-    return 1;
-}
-
 int poly_equal(Polynomial *P, Polynomial *Q) {
     if (P == Q) return 1;
     if (P->deg != Q->deg) return 0;

@@ -13,9 +13,9 @@ with open('README.md') as f:
       if "[Build Status]" not in line:
           long_description += line
 
-pypoly_module = Extension(
-                    "pypoly",
-                    ["pypoly/polynomials.c", "pypoly/pypoly.c"],
+_pypoly_module = Extension(
+                    "_pypoly",
+                    ["pypoly/polynomials.c", "pypoly/_pypoly.c"],
                     define_macros=[
                         ('PYPOLY_VERSION', pypoly_version)])
 
@@ -23,7 +23,8 @@ setup(name="PyPolynomial",
       description="Python polynomial C extension.",
       long_description=long_description,
       version=pypoly_version,
-      ext_modules=[pypoly_module,],
+      packages=['pypoly'],
+      ext_modules=[_pypoly_module,],
       author="Thomas Chaumeny",
       author_email="t.chaumeny@gmail.com",
       url="https://github.com/tchaumeny/PyPoly")

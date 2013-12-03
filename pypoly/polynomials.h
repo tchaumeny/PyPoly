@@ -30,8 +30,6 @@ void poly_free(Polynomial *P);
 
 int poly_copy(Polynomial *P, Polynomial *R);
 
-int poly_initX(Polynomial *P);
-
 int poly_equal(Polynomial *P, Polynomial *Q);
 
 char* poly_to_string(Polynomial *P);
