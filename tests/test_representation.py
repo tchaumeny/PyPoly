@@ -43,9 +43,12 @@ class RepresentationTestCase(unittest.TestCase):
         """We use a finite buffer (typically, 2048 chars) to construct the repr
         of a polynomial. The representation should be truncated to prevent buffer
         overflow."""
+        long_repr = repr(pypoly.Polynomial(*(1 for _ in range(1000))))
+        self.assertEqual(len(long_repr), 2047)
         self.assertEqual(
-            repr(pypoly.Polynomial(*(1 for _ in range(1000)))),
-            ("1 + X + " + " + ".join("X**%d" % i for i in range(2, 1000)))[:2047]
+            long_repr,
+            ("1 + X + " + " + ".join("X**%d" % i for i in range(2, 1000)))[:2032]
+            + "... [truncated]"
         )
 
 if __name__ == '__main__':

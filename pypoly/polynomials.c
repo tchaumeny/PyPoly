@@ -155,6 +155,7 @@ int poly_equal(Polynomial *P, Polynomial *Q) {
 
 #define STR_UNKOWN              "X"
 #define STR_J                   "j"
+#define STR_TRUNCATED           "... [truncated]"
 
 char* poly_to_string(Polynomial *P) {
     if (P->deg == -1) {
@@ -210,7 +211,9 @@ char* poly_to_string(Polynomial *P) {
                                    BUFFER_AVAILABLE(buffer, offset),
                                    "%s**%d", add_mult_sign ? " * " STR_UNKOWN : STR_UNKOWN, i);
             }
-            if (offset >= (int)sizeof(buffer)) {
+            if (offset > (int)sizeof(buffer)) {
+                memcpy(buffer + sizeof(buffer) - strlen(STR_TRUNCATED) - 1,
+                       STR_TRUNCATED, strlen(STR_TRUNCATED));
                 break;
             }
         }
