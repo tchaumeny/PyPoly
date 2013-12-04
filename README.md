@@ -62,5 +62,5 @@ Tracker: <https://github.com/tchaumeny/PyPoly/issues/>
 
 Project page on PyPI: <https://pypi.python.org/pypi/PyPolynomial>
 
-Projet page on GitHub: <https://github.com/tchaumeny/PyPoly>
+Project page on GitHub: <https://github.com/tchaumeny/PyPoly>
 [![Build Status](https://travis-ci.org/tchaumeny/PyPoly.png)](https://travis-ci.org/tchaumeny/PyPoly)
