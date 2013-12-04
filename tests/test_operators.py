@@ -112,6 +112,12 @@ class PowerTestCase(unittest.TestCase):
     def test_zero(self):
         self.assertEqual((1 + X)**0, 1)
 
+    def test_error_high_exponent(self):
+        with self.assertRaisesRegex(ValueError,
+            """Polynomial exponentiation with exponents higher"""
+            """ than 1024 is not supported"""):
+            X**1025
+
     def test_error_neg(self):
         with self.assertRaises(TypeError):
             (1 + X)**-1

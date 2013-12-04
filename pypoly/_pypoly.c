@@ -311,12 +311,23 @@ PyPoly_call(PyPoly_PolynomialObject *self, PyObject *args, PyObject *kwds)
     return PyComplex_FromCComplex(y);
 }
 
+/* Very high exponents are not supported since:
+    - polynomials exponentiation is expensive
+    - exponentiation involve a lot of multiplication and is subject
+      to float rounding errors */
+#define PYPOLY_MAX_EXPONENT 1024
+
 static PyObject*
 PyPoly_pow(PyPoly_PolynomialObject *self, PyObject *pyexp, PyObject *pymod)
 {
     unsigned long exponent = PyLong_AsUnsignedLong(pyexp);
     if (PyErr_Occurred()) {
         Py_RETURN_NOTIMPLEMENTED;
+    }
+    if (exponent > PYPOLY_MAX_EXPONENT) {
+        return PyErr_Format(PyExc_ValueError,
+                            "Polynomial exponentiation with exponents higher"
+                            " than %d is not supported", PYPOLY_MAX_EXPONENT);
     }
     Polynomial P;
     if (!poly_pow(&(self->poly), exponent, &P)) {
