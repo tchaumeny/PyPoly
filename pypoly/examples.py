@@ -1,6 +1,12 @@
 from pypoly import Polynomial, X
 
 #
+# 1 + X + X**2 + ...
+#
+def Ones(n):
+    return Polynomial(*(1 for _ in range(n + 1)))
+
+#
 # Chebyshev polynomials
 #
 
