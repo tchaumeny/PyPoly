@@ -368,26 +368,30 @@ poly_multiply(Polynomial *A, Polynomial *B, Polynomial *R)
 int
 poly_pow(Polynomial *A, unsigned int n, Polynomial *R)
 {
-    // As for multiplication, we can do much better.
-    int failure = 0;
     if (n == 0) {
-        Poly_InitConst(R, ((Complex){1, 0}), failure)
+        int failure = 0;
+        Poly_InitConst(R, ((Complex){1, 0}), failure);
         return !failure;
     }
-    if (poly_copy(A, R)) {
-        Polynomial T;
-        while (--n > 0) {
-            failure = !poly_multiply(R, A, &T);
-            poly_free(R);
-            if (failure) {
-                return 0;
-            }
-            *R = T;
-        }
-        return 1;
-    } else {
+    if (n == 1) {
+        return poly_copy(A, R);
+    }
+    Polynomial T;
+    if (!poly_multiply(A, A, &T)) return 0;
+    if (!poly_pow(&T, n >> 1, R)) {
+        poly_free(&T);
         return 0;
     }
+    poly_free(&T);
+    if (n & 1) {
+        if (!poly_multiply(R, A, &T)) {
+            poly_free(R);
+            return 0;
+        }
+        poly_free(R);
+        *R = T;
+    }
+    return 1;
 }
 
 int

@@ -48,7 +48,7 @@ def evaluate_dense():
     dense_polynomial1(10)
 
 def X_op():
-    1 + X + X**2 + X**3 + X**4 + X**5 + X**6
+    1 + X + X**2 + X**3 + X**4 + X**5 + X**15
 
 BENCHMARK = (
         (add_sparse, 10**7),
