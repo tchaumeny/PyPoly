@@ -35,4 +35,14 @@ setup(name="PyPolynomial",
       ext_modules=[_pypoly_module,],
       author="Thomas Chaumeny",
       author_email="t.chaumeny@gmail.com",
-      url="https://github.com/tchaumeny/PyPoly")
+      url="https://github.com/tchaumeny/PyPoly",
+      classifiers=[
+          'Development Status :: 4 - Beta',
+          'Intended Audience :: Developers',
+          'Intended Audience :: Education',
+          'Intended Audience :: Science/Research',
+          'License :: OSI Approved :: MIT License',
+          'Programming Language :: C',
+          'Programming Language :: Python',
+          'Topic :: Scientific/Engineering :: Mathematics',
+          ],)
