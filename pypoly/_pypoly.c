@@ -505,8 +505,7 @@ memerror:
     return PyErr_NoMemory();
 }
 
-static PyMemberDef
-PyPoly_members[] = {
+static PyMemberDef PyPoly_members[] = {
     {"degree", T_INT, offsetof(PyPoly_PolynomialObject, poly) + offsetof(Polynomial, deg),
      READONLY, "The degree of the Polynomial instance."},
     { NULL, 0, 0, 0, NULL }
@@ -619,7 +618,7 @@ static PyModuleDef PyPolymodule = {
 };
 
 PyMODINIT_FUNC
-PyInit__pypoly(void) 
+PyInit__pypoly(void)
 {
     PyObject* m;
 

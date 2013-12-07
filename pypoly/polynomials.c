@@ -12,7 +12,9 @@
 #define MAX(a,b)    (((int)(a)>(int)(b))?(int)(a):(int)(b))
 
 /* strdup is not part of the C standard and might not be available */
-static inline char *strduplicate(const char *s) {
+static inline char*
+strduplicate(const char *s)
+{
     int len = strlen(s) + 1;
     char *p;
     if ((p = malloc(len * sizeof(char))) == NULL) {
@@ -29,31 +31,41 @@ static inline char *strduplicate(const char *s) {
 const Complex CZero = {0., 0.}, COne = {1., 0.};
 
 #ifndef PYPOLY_VERSION
-static inline Complex complex_add(Complex a, Complex b) {
+static inline Complex
+complex_add(Complex a, Complex b)
+{
     return (Complex){
         a.real + b.real,
         a.imag + b.imag
     };
 }
-static inline Complex complex_sub(Complex a, Complex b) {
+static inline Complex
+complex_sub(Complex a, Complex b)
+{
     return (Complex){
         a.real - b.real,
         a.imag - b.imag
     };
 }
-static inline Complex complex_neg(Complex z) {
+static inline Complex
+complex_neg(Complex z)
+{
     return (Complex){
         - z.real,
         - z.imag
     };
 }
-static inline Complex complex_mult(Complex a, Complex b) {
+static inline Complex
+complex_mult(Complex a, Complex b)
+{
     return (Complex){
         a.real * b.real - a.imag * b.imag,
         a.real * b.imag + a.imag * b.real
     };
 }
-static inline Complex complex_div(Complex a, Complex b) {
+static inline Complex
+complex_div(Complex a, Complex b)
+{
     Complex r;
     double d = b.real*b.real + b.imag*b.imag;
     if (d == 0.) {
@@ -88,7 +100,9 @@ static inline Complex complex_div(Complex a, Complex b) {
 /* Create a Polynomial of degree "deg" at address pointed by P.
  * If "deg" is -1, no memory is allocated and the coefficients pointer
  * is set to NULL. */
-int poly_init(Polynomial *P, int deg) {
+int
+poly_init(Polynomial *P, int deg)
+{
     if (deg == -1) {
         P->coef = NULL;
     } else if ((P->coef = calloc(deg + 1, sizeof(Complex))) == NULL) {
@@ -101,23 +115,31 @@ int poly_init(Polynomial *P, int deg) {
 }
 
 /* Free memory allocated for a polynomial */
-void poly_free(Polynomial *P) {
+void
+poly_free(Polynomial *P)
+{
     free(P->coef);
     P->coef = NULL;
 }
 
-static inline void _poly_set_coef(Polynomial *P, int i, Complex c) {
+static inline void
+_poly_set_coef(Polynomial *P, int i, Complex c)
+{
     if (!complex_iszero(c)) P->bloom |= Poly_BloomMask(i);
     P->coef[i] = c;
 }
 
-static inline void _poly_incr_coef(Polynomial *P, int i, Complex c) {
+static inline void
+_poly_incr_coef(Polynomial *P, int i, Complex c)
+{
     if (!complex_iszero(c)) P->bloom |= Poly_BloomMask(i);
     P->coef[i].real += c.real;
     P->coef[i].imag += c.imag;
 }
 
-void poly_set_coef(Polynomial *P, int i, Complex c) {
+void
+poly_set_coef(Polynomial *P, int i, Complex c)
+{
     /* /!\ i should be <= allocated */
     _poly_set_coef(P, i, c);
     if (i > P->deg && !complex_iszero(c)) {
@@ -127,7 +149,9 @@ void poly_set_coef(Polynomial *P, int i, Complex c) {
     }
 }
 
-int poly_equal(Polynomial *P, Polynomial *Q) {
+int
+poly_equal(Polynomial *P, Polynomial *Q)
+{
     if (P == Q) return 1;
     if (P->deg != Q->deg) return 0;
     int i;
@@ -157,7 +181,9 @@ int poly_equal(Polynomial *P, Polynomial *Q) {
 #define STR_J                   "j"
 #define STR_TRUNCATED           "... [truncated]"
 
-char* poly_to_string(Polynomial *P) {
+char*
+poly_to_string(Polynomial *P)
+{
     if (P->deg == -1) {
         return strdup("0");
     } else {
@@ -224,7 +250,9 @@ char* poly_to_string(Polynomial *P) {
 /* Polynomial evaluation at a given point using Horner's method.
  * Performs O(deg P) operations (naïve approach is quadratic).
  * See http://en.wikipedia.org/wiki/Horner%27s_method */
-Complex poly_eval(Polynomial *P, Complex c) {
+Complex
+poly_eval(Polynomial *P, Complex c)
+{
     Complex result = CZero;
     int i;
     for (i = P->deg; i >= 0; --i) {
@@ -244,7 +272,9 @@ Complex poly_eval(Polynomial *P, Complex c) {
  */
 
 /* Copy polynomial pointed by A to the location pointed by P */
-int poly_copy(Polynomial *A, Polynomial *P) {
+int
+poly_copy(Polynomial *A, Polynomial *P)
+{
     if (!poly_init(P, A->deg)) {
         return 0;
     }
@@ -253,7 +283,9 @@ int poly_copy(Polynomial *A, Polynomial *P) {
     return 1;
 }
 
-int poly_add(Polynomial *A, Polynomial *B, Polynomial *R) {
+int
+poly_add(Polynomial *A, Polynomial *B, Polynomial *R)
+{
     if (!poly_init(R, MAX(A->deg, B->deg))) {
         return 0;
     }
@@ -265,7 +297,9 @@ int poly_add(Polynomial *A, Polynomial *B, Polynomial *R) {
     return 1;
 }
 
-int poly_sub(Polynomial *A, Polynomial *B, Polynomial *R) {
+int
+poly_sub(Polynomial *A, Polynomial *B, Polynomial *R)
+{
     if (!poly_init(R, MAX(A->deg, B->deg))) {
         return 0;
     }
@@ -277,7 +311,9 @@ int poly_sub(Polynomial *A, Polynomial *B, Polynomial *R) {
     return 1;
 }
 
-int poly_neg(Polynomial *A, Polynomial *Q) {
+int
+poly_neg(Polynomial *A, Polynomial *Q)
+{
     if (!poly_init(Q, A->deg)) {
         return 0;
     }
@@ -288,7 +324,9 @@ int poly_neg(Polynomial *A, Polynomial *Q) {
     return 1;
 }
 
-int poly_scal_multiply(Polynomial *A, Complex c, Polynomial *R) {
+int
+poly_scal_multiply(Polynomial *A, Complex c, Polynomial *R)
+{
     if (complex_iszero(c)) {
         poly_init(R, -1);
         return 1;
@@ -305,7 +343,9 @@ int poly_scal_multiply(Polynomial *A, Complex c, Polynomial *R) {
     return 1;
 }
 
-int poly_multiply(Polynomial *A, Polynomial *B, Polynomial *R) {
+int
+poly_multiply(Polynomial *A, Polynomial *B, Polynomial *R)
+{
     // TODO: implement faster algo
     if (A->deg == -1 || B->deg == -1) {
         poly_init(R, -1);
@@ -325,7 +365,9 @@ int poly_multiply(Polynomial *A, Polynomial *B, Polynomial *R) {
     return 1;
 }
 
-int poly_pow(Polynomial *A, unsigned int n, Polynomial *R) {
+int
+poly_pow(Polynomial *A, unsigned int n, Polynomial *R)
+{
     // As for multiplication, we can do much better.
     int failure = 0;
     if (n == 0) {
@@ -348,7 +390,9 @@ int poly_pow(Polynomial *A, unsigned int n, Polynomial *R) {
     }
 }
 
-int poly_derive(Polynomial *A, unsigned int n, Polynomial *R) {
+int
+poly_derive(Polynomial *A, unsigned int n, Polynomial *R)
+{
     if (!poly_init(R, MAX(-1, A->deg - (int)n))) {
         return 0;
     }
@@ -361,7 +405,9 @@ int poly_derive(Polynomial *A, unsigned int n, Polynomial *R) {
     return 1;
 }
 
-int poly_integrate(Polynomial *A, unsigned int n, Polynomial *R) {
+int
+poly_integrate(Polynomial *A, unsigned int n, Polynomial *R)
+{
     if (!poly_init(R, (A->deg == -1) ? -1 : A->deg + (int)n)) {
         return 0;
     }
@@ -379,7 +425,9 @@ int poly_integrate(Polynomial *A, unsigned int n, Polynomial *R) {
  *      A = B * Q + R, deg R < deg B
  * If B is zero, the operation is undefined and returns -1.
  */
-int poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R) {
+int
+poly_div(Polynomial *A, Polynomial *B, Polynomial *Q, Polynomial *R)
+{
     if (B->deg == -1) {
         return -1;  // Division by zero
     }
@@ -438,7 +486,9 @@ error:
  *       A, B <= B, A % B   # Invariant: PGCD(A, B)
  *   P = A
  */
-int poly_gcd(Polynomial *A, Polynomial *B, Polynomial *P) {
+int
+poly_gcd(Polynomial *A, Polynomial *B, Polynomial *P)
+{
     Polynomial R, T;
     poly_init(P, -1);
     poly_init(&R, -1);
