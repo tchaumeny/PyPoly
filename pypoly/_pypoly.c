@@ -491,6 +491,7 @@ PyPoly_gcd(PyObject *self, PyObject *args)
         item = PyTuple_GET_ITEM(args, i);
         if(!PyPolynomial_Check(item)) {
             poly_free(&P);
+            poly_free(&T);
             Py_RETURN_NOTIMPLEMENTED;
         }
         if (!poly_gcd(&P, &(((PyPoly_PolynomialObject*)item)->poly), &T)) goto memerror;
