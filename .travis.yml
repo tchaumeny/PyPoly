@@ -1,4 +1,7 @@
 language: python
+env:
+  - CC=clang
+  - CC=gcc
 python:
   - 3.2
   - 3.3
