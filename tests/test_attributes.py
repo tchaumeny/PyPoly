@@ -1,4 +1,5 @@
 import unittest
+import sys
 
 from pypoly import Polynomial, X
 
@@ -16,7 +17,8 @@ class DegreeTestCase(unittest.TestCase):
         self.assertEqual((1 + X - 3 * X**4).degree, 4)
 
     def test_readonly(self):
-        with self.assertRaises(AttributeError):
+        Exc = AttributeError if sys.version_info[0] >= 3 else TypeError
+        with self.assertRaises(Exc):
             X.degree = 3
 
 if __name__ == '__main__':

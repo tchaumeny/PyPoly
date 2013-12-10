@@ -13,7 +13,7 @@ class GCDTestCase(unittest.TestCase):
     def test_zero(self):
         self.assertEqual(
             gcd(Polynomial(1, 2, 3), Polynomial(0)),
-            Polynomial(1 / 3, 2 / 3, 1))
+            Polynomial(1. / 3, 2. / 3, 1))
 
     def test_constant(self):
         self.assertEqual(

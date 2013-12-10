@@ -3,10 +3,6 @@ import re
 import sys
 
 
-if sys.version_info[0] < 3:
-    print("PyPoly requires Python >= 3")
-    sys.exit()
-
 with open("pypoly/version.py") as f:
     vfile_content = f.read()
 

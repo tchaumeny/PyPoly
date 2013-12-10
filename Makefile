@@ -18,7 +18,7 @@ doctest:
 	$(PYTHON) -m doctest README.md -v
 
 unittest:
-	$(PYTHON) -m unittest
+	$(PYTHON) -m unittest discover -s tests
 
 test: doctest unittest
 

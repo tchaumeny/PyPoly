@@ -39,7 +39,7 @@ def LegendreIterator():
     n = 1
     while True:
         T = V
-        V = 1 / (n + 1) * ((2 * n + 1) * X * V - n * U)
+        V = 1. / (n + 1) * ((2 * n + 1) * X * V - n * U)
         yield V
         U = T
         n += 1 

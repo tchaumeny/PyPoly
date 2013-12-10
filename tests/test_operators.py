@@ -1,4 +1,5 @@
 import unittest
+import sys
 
 from pypoly import Polynomial, X
 
@@ -113,7 +114,9 @@ class PowerTestCase(unittest.TestCase):
         self.assertEqual((1 + X)**0, 1)
 
     def test_error_high_exponent(self):
-        with self.assertRaisesRegex(ValueError,
+        funcname = 'assertRaisesRegex' if sys.version_info[0] >= 3 else 'assertRaisesRegexp'
+        assertRaisesRegex = getattr(self, funcname)
+        with assertRaisesRegex(ValueError,
             """Polynomial exponentiation with exponents higher"""
             """ than 1024 is not supported"""):
             X**1025

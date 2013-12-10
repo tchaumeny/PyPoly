@@ -95,6 +95,14 @@ extract_complex(PyObject *obj, Py_complex *dest)
         if (c.real == -1.0 && PyErr_Occurred()) {
             return EXTRACT_ERR;
         }
+#if PY_MAJOR_VERSION < 3
+    } else if (PyInt_Check(obj)) {
+        c = CZero;
+        c.real = (double)PyInt_AsLong(obj);
+        if (c.real == -1.0 && PyErr_Occurred()) {
+            return EXTRACT_ERR;
+        }
+#endif
     } else {
         return EXTRACT_ERRTYPE;
     }
@@ -447,7 +455,9 @@ static PyObject*
 PyPoly_compare(PyObject *self, PyObject *other, int opid)
 {
     if (opid != Py_EQ && opid != Py_NE) {
-        Py_RETURN_NOTIMPLEMENTED;
+        PyErr_SetString(PyExc_TypeError,
+                        "Unsupported operation on polynomials");
+        return NULL;
     }
     PYPOLY_BINARYFUNC_HEADER
     int ret = (poly_equal(&A, &B) && opid == Py_EQ)
@@ -516,6 +526,9 @@ static PyNumberMethods PyPoly_NumberMethods = {
     (binaryfunc)PyPoly_add,         /* nb_add */
     (binaryfunc)PyPoly_sub,         /* nb_subtract */
     (binaryfunc)PyPoly_mult,        /* nb_multiply */
+#if PY_MAJOR_VERSION < 3
+    (binaryfunc)PyPoly_div,         /* nb_divide; */
+#endif
     (binaryfunc)PyPoly_remain,      /* nb_remainder */
     (binaryfunc)PyPoly_divmod,      /* nb_divmod */
     (ternaryfunc)PyPoly_pow,        /* nb_power */
@@ -529,12 +542,22 @@ static PyNumberMethods PyPoly_NumberMethods = {
     0,                              /* nb_and; */
     0,                              /* nb_xor; */
     0,                              /* nb_or; */
+#if PY_MAJOR_VERSION < 3
+    0,                              /* nb_coerce; */
+#endif
     0,                              /* nb_int; */
     0,                              /* nb_reserved; */
     0,                              /* nb_float; */
+#if PY_MAJOR_VERSION < 3
+    0,                              /* nb_oct; */
+    0,                              /* nb_hex; */
+#endif
     0,                              /* nb_inplace_add; */
     0,                              /* nb_inplace_subtract; */
     0,                              /* nb_inplace_multiply; */
+#if PY_MAJOR_VERSION < 3
+    0,                              /* nb_inplace_divide; */
+#endif
     0,                              /* nb_inplace_remainder; */
     0,                              /* nb_inplace_power; */
     0,                              /* nb_inplace_lshift; */
@@ -563,7 +586,12 @@ static PySequenceMethods PyPoly_as_sequence = {
 };
 
 static PyTypeObject PyPoly_PolynomialType = {
+#if PY_MAJOR_VERSION >= 3
     PyVarObject_HEAD_INIT(NULL, 0)
+#else
+    PyObject_HEAD_INIT(NULL)
+    0,
+#endif
     "Polynomial",                       /* tp_name */
     sizeof(PyPoly_PolynomialObject),    /* tp_basicsize */
     0,                                  /* tp_itemsize */
@@ -582,6 +610,10 @@ static PyTypeObject PyPoly_PolynomialType = {
     0,                                  /* tp_getattro */
     0,                                  /* tp_setattro */
     0,                                  /* tp_as_buffer */
+#if PY_MAJOR_VERSION < 3
+    Py_TPFLAGS_CHECKTYPES |
+    Py_TPFLAGS_HAVE_RICHCOMPARE |
+#endif
     Py_TPFLAGS_DEFAULT,                 /* tp_flags */
     "Polynomial objects",               /* tp_doc */
     0,                                  /* tp_traverse */
@@ -609,10 +641,12 @@ static PyMethodDef PyPolymethods[] = {
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+#define PYPOLY_MODULE_DESC "Python C extension defining the Polynomial type."
+#if PY_MAJOR_VERSION >= 3
 static PyModuleDef PyPolymodule = {
     PyModuleDef_HEAD_INIT,
     "_pypoly",
-    "Python C extension defining the Polynomial type.",
+    PYPOLY_MODULE_DESC,
     -1,
     PyPolymethods,
     NULL, NULL, NULL, NULL
@@ -636,3 +670,22 @@ PyInit__pypoly(void)
 
     return m;
 }
+#else
+PyMODINIT_FUNC
+init_pypoly(void)
+{
+    PyObject* m;
+
+    if (PyType_Ready(&PyPoly_PolynomialType) < 0)
+        return;
+
+    m = Py_InitModule3("_pypoly",
+        PyPolymethods, PYPOLY_MODULE_DESC);
+    if (m == NULL)
+        return;
+
+    /* Add "Polynomial" type to module */
+    Py_INCREF(&PyPoly_PolynomialType);
+    PyModule_AddObject(m, "Polynomial", (PyObject *)&PyPoly_PolynomialType);
+}
+#endif

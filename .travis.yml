@@ -3,8 +3,9 @@ env:
   - CC=clang
   - CC=gcc
 python:
-  - 3.2
-  - 3.3
+  - "2.7"
+  - "3.2"
+  - "3.3"
 install:
   - make install
   - pip install pylint

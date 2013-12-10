@@ -6,8 +6,6 @@ A Python extension written in C, implementing the `Polynomial` type.
 Installation
 ------------
 
-*Requires Python 3*
-
     python setup.py install
 
 Or:
