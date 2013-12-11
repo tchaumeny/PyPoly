@@ -1,6 +1,6 @@
 from distutils.core import setup, Extension
+import os
 import re
-import sys
 
 
 with open("pypoly/version.py") as f:
@@ -11,11 +11,7 @@ assert match
 
 __version__ = match.group(1)
 
-long_description = ""
-with open("README.md") as f:
-    for line in f:
-      if "[Build Status]" not in line:
-          long_description += line
+long_description = open(os.path.join(os.path.dirname(__file__), "README.rst")).read()
 
 _pypoly_module = Extension(
                     "_pypoly",

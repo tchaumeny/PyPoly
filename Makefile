@@ -15,7 +15,7 @@ pylint:
 	pylint pypoly tests benchmark.py --errors-only
 
 doctest:
-	$(PYTHON) -m doctest README.md -v
+	$(PYTHON) -m doctest README.rst -v
 
 unittest:
 	$(PYTHON) -m unittest discover -s tests
