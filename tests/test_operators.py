@@ -150,6 +150,30 @@ class SequenceTestCase(unittest.TestCase):
     def test_get_item_gt_deg(self):
         self.assertEqual((1 + 2 * X + 3 * X**2)[3], 0)
 
+    def test_assign_item(self):
+        P = 1 + 2 * X + 3 * X**2
+        P[2] = 4.5
+        self.assertEqual(P, 1 + 2 * X + 4.5 * X**2)
+        self.assertEqual(P.degree, 2)
+
+    def test_assign_item_larger(self):
+        P = 1 + 2 * X + 3 * X**2
+        P[8] = 1j
+        self.assertEqual(P, 1 + 2 * X + 3 * X**2 + 1j * X**8)
+        self.assertEqual(P.degree, 8)
+
+    def test_assign_item_zero(self):
+        P = 1 + 2 * X + 3 * X**2
+        P[2] = 0
+        self.assertEqual(P, 1 + 2 * X)
+        self.assertEqual(P.degree, 1)
+
+    def test_assign_item_zero_larger(self):
+        P = 1 + 2 * X + 3 * X**2
+        P[8] = 0
+        self.assertEqual(P, 1 + 2 * X + 3 * X**2)
+        self.assertEqual(P.degree, 2)
+
 class CallTestCase(unittest.TestCase):
     def test_constant(self):
         self.assertEqual(Polynomial(1, 0, 0)(2), 1)

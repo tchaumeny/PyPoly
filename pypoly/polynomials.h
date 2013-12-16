@@ -36,6 +36,8 @@ char* poly_to_string(Polynomial *P);
 
 void poly_set_coef(Polynomial *P, int i, Complex c);
 
+int poly_realloc(Polynomial *P, int deg);
+
 Complex poly_eval(Polynomial *P, Complex c);
 
 int poly_add(Polynomial *A, Polynomial *B, Polynomial *R);

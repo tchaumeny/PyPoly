@@ -99,7 +99,11 @@ complex_div(Complex a, Complex b)
 
 /* Create a Polynomial of degree "deg" at address pointed by P.
  * If "deg" is -1, no memory is allocated and the coefficients pointer
- * is set to NULL. */
+ * is set to NULL.
+ *
+ * /!\ This function assumes poly_set_coef will be called afterwards
+ * so that the degree gets properly computed.
+ */
 int
 poly_init(Polynomial *P, int deg)
 {
@@ -147,6 +151,26 @@ poly_set_coef(Polynomial *P, int i, Complex c)
     } else if (i == P->deg) {
         Poly_ResizeDown(P);
     }
+}
+
+/* Reallocate memory for P (e.g. for setting a new coef. higher than previous degree)
+ *
+ * /!\ This function assumes poly_set_coef will be called afterwards
+ * so that the degree gets properly computed.
+ */
+int
+poly_realloc(Polynomial *P, int deg)
+{
+    Complex *coef = realloc(P->coef, (deg + 1) * sizeof(Complex));
+    if (coef == NULL) {
+        return 0;
+    }
+    if (deg > P->deg) {
+        memset(coef + P->deg + 1, 0, (deg - P->deg) * sizeof(Complex));
+    }
+    P->coef = coef;
+    P->deg = deg;
+    return 1;
 }
 
 int

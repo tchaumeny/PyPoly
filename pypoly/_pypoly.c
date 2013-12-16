@@ -481,6 +481,24 @@ PyPoly_getitem(PyPoly_PolynomialObject *self, Py_ssize_t i)
     return PyComplex_FromCComplex(coef);
 }
 
+int
+PyPoly_setitem(PyPoly_PolynomialObject *self, Py_ssize_t i, PyObject *v)
+{
+    Py_complex c;
+    if (extract_complex(v, &c) != EXTRACT_CREATED) {
+        PyErr_SetString(PyExc_TypeError,
+                        "Incorrect argument for item assignment.");
+        return -1;
+    }
+    if (i > self->poly.deg && !poly_realloc(&(self->poly), i)) {
+        PyErr_SetString(PyExc_MemoryError,
+                        "Failed to allocate memory.");
+        return -1;
+    }
+    poly_set_coef(&(self->poly), i, c);
+    return 0;
+}
+
 /* Module methods */
 
 static PyObject*
@@ -573,16 +591,16 @@ static PyNumberMethods PyPoly_NumberMethods = {
 };
 
 static PySequenceMethods PyPoly_as_sequence = {
-    0,                              /* sq_length */
-    0,                              /* sq_concat */
-    0,                              /* sq_repeat */
-    (ssizeargfunc)PyPoly_getitem,   /* sq_item */
-    0,                              /* sq_slice */
-    0,                              /* sq_ass_item */
-    0,                              /* sq_ass_slice */
-    0,                              /* sq_contains */
-    0,                              /* sq_inplace_concat */
-    0                               /* sq_inplace_repeat */
+    0,                                  /* sq_length */
+    0,                                  /* sq_concat */
+    0,                                  /* sq_repeat */
+    (ssizeargfunc)PyPoly_getitem,       /* sq_item */
+    0,                                  /* sq_slice */
+    (ssizeobjargproc)PyPoly_setitem,    /* sq_ass_item */
+    0,                                  /* sq_ass_slice */
+    0,                                  /* sq_contains */
+    0,                                  /* sq_inplace_concat */
+    0                                   /* sq_inplace_repeat */
 };
 
 static PyTypeObject PyPoly_PolynomialType = {
