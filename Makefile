@@ -1,5 +1,6 @@
 # Conf
 PYTHON = python
+CFLAGS="-g -Wall -Wextra -pedantic -std=c99"
 
 .PHONY: clean install build pylint doctest unittest test benchmark
 
@@ -7,7 +8,7 @@ clean:
 	rm -rf build/ tests/__pycache__ MANIFEST
 
 install:
-	CFLAGS="-g -Wall -Wextra -pedantic -std=c99" $(PYTHON) setup.py install
+	CFLAGS=$(CFLAGS) $(PYTHON) setup.py install
 
 build: clean install
 
@@ -18,7 +19,7 @@ doctest:
 	$(PYTHON) -m doctest README.rst -v
 
 unittest:
-	$(PYTHON) -m unittest discover -s tests
+	$(PYTHON) -m nose tests
 
 test: doctest unittest
 
