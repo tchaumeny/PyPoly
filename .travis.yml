@@ -9,7 +9,7 @@ python:
   - "3.3"
 install:
   - make install
-  - pip install pylint
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.3' ]]; then pip install pylint; fi
 script:
-  - make pylint
-  - make test
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.3' ]]; then make pylint; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then make doctest; else make test; fi
