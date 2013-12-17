@@ -22,7 +22,7 @@ Usage
 
 **Instanciating a polynomial:**
 
-.. code:: python
+.. code-block:: python
 
     >>> from pypoly import Polynomial
     >>> P = Polynomial(-1, 0, complex(1, 3))
@@ -33,7 +33,7 @@ Usage
 
 Or:
 
-.. code:: python
+.. code-block:: python
 
     >>> from pypoly import X
     >>> P = (X - 1) * (X**2 + 2)
@@ -42,7 +42,7 @@ Or:
 
 **Operations on polynomials:**
 
-.. code:: python
+.. code-block:: python
 
     >>> Polynomial(-1, -1) * Polynomial(2, -3)
     -2 + X + 3 * X**2
@@ -56,7 +56,7 @@ Or:
 
 Even more:
 
-.. code:: python
+.. code-block:: python
 
     >>> (1 + X**3 - 2 * X**5) >> 2      # Second derivative
     6 * X - 40 * X**3
