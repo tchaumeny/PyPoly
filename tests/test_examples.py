@@ -28,5 +28,15 @@ class LegendreTestCase(unittest.TestCase):
     def test_legendre_5(self):
         self.assertEqual(Legendre(5), (63 * X**5 - 70 * X**3 + 15 * X) / 8)
 
+class HermiteTestCase(unittest.TestCase):
+    def test_hermite_0(self):
+        self.assertEqual(Hermite(0), 1)
+
+    def test_hermite_1(self):
+        self.assertEqual(Hermite(1), X)
+
+    def test_hermite_5(self):
+        self.assertEqual(Hermite(5), X**5 - 10 * X**3 + 15 * X)
+
 if __name__ == '__main__':
     unittest.main()

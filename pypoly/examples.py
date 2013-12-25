@@ -3,6 +3,7 @@ from pypoly import Polynomial, X
 #
 # 1 + X + X**2 + ...
 #
+
 def Ones(n):
     return Polynomial(*(1 for _ in range(n + 1)))
 
@@ -18,7 +19,6 @@ def ChebyshevIterator():
     while True:
         U, V = V, 2 * X * V - U
         yield V
-
 
 def Chebyshev(n):
     it = ChebyshevIterator()
@@ -46,3 +46,25 @@ def Legendre(n):
     for i in range(n):
         next(it)
     return next(it)
+
+#
+# Hermite polynomials
+#
+
+def HermiteIterator():
+    U = 1
+    yield U
+    V = X
+    yield V
+    n = 1
+    while True:
+        U, V = V, X * V - n * U
+        yield V
+        n += 1
+
+def Hermite(n):
+    it = HermiteIterator()
+    for i in range(n):
+        next(it)
+    return next(it)
+
