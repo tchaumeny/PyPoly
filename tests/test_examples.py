@@ -37,6 +37,19 @@ class HermiteTestCase(unittest.TestCase):
 
     def test_hermite_5(self):
         self.assertEqual(Hermite(5), X**5 - 10 * X**3 + 15 * X)
+        
+class CyclotomicTestCase(unittest.TestCase):
+    def test_cyclotomic_1(self):
+        self.assertEqual(Cyclotomic(1), X - 1)
+
+    def test_cyclotomic_2(self):
+        self.assertEqual(Cyclotomic(2), X + 1)
+        
+    def test_cyclotomic_6(self):
+        self.assertEqual(Cyclotomic(6), X**2 - X + 1)    
+
+    def test_cyclotomic_20(self):
+        self.assertEqual(Cyclotomic(20), X**8 - X**6 + X**4 - X**2 + 1)  
 
 if __name__ == '__main__':
     unittest.main()
