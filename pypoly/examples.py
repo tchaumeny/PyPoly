@@ -67,4 +67,21 @@ def Hermite(n):
     for i in range(n):
         next(it)
     return next(it)
+  
+#
+# Cyclotomic polynomials
+#  
+    
+def Cyclotomic(n):
+    if n < 1:
+        raise Exception("only positive") 
+    elif n == 1:
+        return X - 1
 
+    denominator = X - 1
+    for d in range(2,n):
+        if n%d == 0:
+           denominator *= Cyclotomic(d)  
+    
+    return (X**n - 1) // denominator 
+    
