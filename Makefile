@@ -5,7 +5,8 @@ CFLAGS="-g -Wall -Wextra -pedantic -std=c99"
 .PHONY: clean install build pylint doctest unittest test benchmark
 
 clean:
-	rm -rf build/ tests/__pycache__ MANIFEST
+	rm -rf build/ MANIFEST pypoly/__pycache__ tests/__pycache__	\
+		   pypoly/*.pyc tests/*.pyc
 
 install:
 	CFLAGS=$(CFLAGS) $(PYTHON) setup.py install
