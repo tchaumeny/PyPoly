@@ -46,10 +46,10 @@ class CyclotomicTestCase(unittest.TestCase):
         self.assertEqual(Cyclotomic(2), X + 1)
         
     def test_cyclotomic_6(self):
-        self.assertEqual(Cyclotomic(6), X**2 - X + 1)    
+        self.assertEqual(Cyclotomic(6), X**2 - X + 1)
 
     def test_cyclotomic_20(self):
-        self.assertEqual(Cyclotomic(20), X**8 - X**6 + X**4 - X**2 + 1)  
+        self.assertEqual(Cyclotomic(20), X**8 - X**6 + X**4 - X**2 + 1)
 
 if __name__ == '__main__':
     unittest.main()

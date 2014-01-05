@@ -2,7 +2,10 @@
 pypoly: Python Polynomials 
 ==========================
 
-A Python extension written in C, implementing the ``Polynomial`` type.
+A Python extension I wrote to learn the `Python C API`_.
+It defines the ``Polynomial`` type and some common operations.
+
+.. _`Python C API`: https://docs.python.org/c-api/
 
 Installation
 ============
