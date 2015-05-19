@@ -285,6 +285,30 @@ poly_eval(Polynomial *P, Complex c)
     return result;
 }
 
+/* Polynomial evaluation at a given point using Newton's Method.*/
+Complex 
+poly_eval_newton(Polynomial *P, Complex c)
+{
+	Complex result = CZero; 
+	Polynomial *R; 
+	unsigned int n; 
+	
+	int eval = poly_eval((Complex)poly_derive(*P,n,R),c); 
+
+
+
+	//test_init = poly_init(P, n, R); 
+	//result = complex_sub(c, complex_div(poly_eval(P, c), poly_eval((Complex)poly_derive(P, n, R), c))); 
+	//result = complex_sub(c, complex_div(poly_eval(P, c));
+
+
+
+	//result = complex_sub(c, complex_div(poly_eval(*P,c), c)); 
+	
+		//result = complex_sub(poly_eval(*P,c), result); 
+		//result = complex_sub(c, complex_div(poly_eval(*P,c), poly_eval(poly_derive(*P,n, poly_init(*P,n, *R))); 
+}
+
 /**
  * Polynomial operators
  * We use the following naming convention:

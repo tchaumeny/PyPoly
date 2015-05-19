@@ -23,7 +23,7 @@ Or, using pip_::
 Usage
 =====
 
-**Instanciating a polynomial:**
+**Instantiating a polynomial:**
 
 .. code-block:: python
 
