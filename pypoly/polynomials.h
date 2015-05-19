@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #ifndef PYPOLY_VERSION
-typedef struct {
+typedef struct Complex{
     double real;
     double imag;
 } Complex;
@@ -18,7 +18,7 @@ typedef struct {
  * Since a Complex generally takes 8 bytes of memory, the coefficients will take
  * (1 + degree) * 8 bytes of memory. This shouldn't be a problem in common
  * use cases. */
-typedef struct {
+typedef struct Polynomial {
     Complex* coef;
     int deg;
     uint32_t bloom;
@@ -39,6 +39,8 @@ void poly_set_coef(Polynomial *P, int i, Complex c);
 int poly_realloc(Polynomial *P, int deg);
 
 Complex poly_eval(Polynomial *P, Complex c);
+
+Complex poly_eval_newton(Polynomial *P, Complex c); 
 
 int poly_add(Polynomial *A, Polynomial *B, Polynomial *R);
 
